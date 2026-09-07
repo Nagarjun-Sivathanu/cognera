@@ -1,8 +1,6 @@
-import questionsData from '../data/questions.json'
 import { randomBackgroundId } from './backgrounds'
-import type { DifficultyTier, DungeonDef, Question, Subject } from '../types'
-
-const questions = questionsData as Question[]
+import { allQuestions as questions } from './questions'
+import type { DifficultyTier, DungeonDef, Subject } from '../types'
 
 const TIERS: DifficultyTier[] = ['Easy', 'Medium', 'Moderate', 'Hard']
 

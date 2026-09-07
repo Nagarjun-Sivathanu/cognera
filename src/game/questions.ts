@@ -1,7 +1,10 @@
 import questionsData from '../data/questions.json'
+import jeeQuestionsData from '../data/questions-jee.json'
 import type { DungeonDef, Question } from '../types'
 
-const allQuestions = questionsData as Question[]
+// questions.json: hand-written placeholders (currently the only Biology content).
+// questions-jee.json: converted from the real JEE-style dataset (Math/Physics/Chemistry).
+export const allQuestions = [...(questionsData as Question[]), ...(jeeQuestionsData as Question[])]
 
 /**
  * Picks a question for the given enemy within the dungeon's subjects.
