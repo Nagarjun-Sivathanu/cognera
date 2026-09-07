@@ -1,8 +1,10 @@
 import { getAttackPower, getLevel, getMaxHp, xpIntoLevel } from '../game/player'
 import { useGameStore } from '../store/gameStore'
+import { PlayerAvatar } from './PlayerAvatar'
 
 export function HUD({ onOpenSheet }: { onOpenSheet: () => void }) {
   const player = useGameStore((s) => s.player)
+  const enterHub = useGameStore((s) => s.enterHub)
   const level = getLevel(player.xp)
   const maxHp = getMaxHp(player)
   const attack = getAttackPower(player)
@@ -11,6 +13,13 @@ export function HUD({ onOpenSheet }: { onOpenSheet: () => void }) {
   return (
     <div className="flex items-center justify-between border-b border-stone-800 bg-stone-950 px-4 py-3">
       <div className="flex items-center gap-4">
+        <button type="button" onClick={enterHub} title="Back to hub">
+          <PlayerAvatar size={40} />
+        </button>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-stone-500">Potions</p>
+          <p className="text-lg font-bold text-emerald-300">{player.potions}</p>
+        </div>
         <div>
           <p className="text-xs uppercase tracking-wide text-stone-500">Level</p>
           <p className="text-lg font-bold text-stone-100">{level}</p>

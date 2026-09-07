@@ -1,6 +1,16 @@
 import { create } from 'zustand'
 import dungeonsData from '../data/dungeons.json'
-import { generateEncounters, rollDamage, xpForEnemy } from '../game/combat'
+import {
+  BAG_HEAL_FRACTION,
+  DODGE_CHANCE,
+  generateEncounters,
+  POTIONS_PER_CLEAR,
+  rollDamage,
+  STAGGER_CHANCE,
+  WINDUP_BONUS_MULTIPLIER,
+  WINDUP_WRONG_MULTIPLIER,
+  xpForEnemy,
+} from '../game/combat'
 import { generateItem, lootRollsForTier, rollRarity, skillPointsForTier } from '../game/loot'
 import { createNewPlayer, getAttackPower, getLootLuckPercent, getMaxHp, recordAnswer, skills } from '../game/player'
 import { getQuestionForEnemy } from '../game/questions'
@@ -10,13 +20,13 @@ import type { DungeonDef, Item, ItemSlot, LastRunResult, PlayerState, Question, 
 const dungeons = dungeonsData as DungeonDef[]
 
 type Phase = 'question' | 'feedback' | 'result'
+type Tone = 'good' | 'bad' | 'neutral'
 
 interface Feedback {
-  correct: boolean
-  damage: number
-  target: 'enemy' | 'player'
+  message: string
+  tone: Tone
+  target: 'enemy' | 'player' | 'none'
   enemyDefeated: boolean
-  encounterCleared: boolean
 }
 
 interface GameStore {
@@ -25,11 +35,19 @@ interface GameStore {
   currentQuestion: Question | null
   feedback: Feedback | null
   lastResult: LastRunResult | null
-  view: 'list' | 'run'
+  view: 'title' | 'hub' | 'list' | 'run'
   phase: Phase
+  windUpArmed: boolean
 
+  enterHub: () => void
+  enterMap: () => void
+  setPlayerName: (name: string) => void
   startRun: (dungeonId: string) => void
   answerQuestion: (selectedIndex: number) => void
+  armWindUp: () => void
+  useBag: () => void
+  useDodge: () => void
+  useStagger: () => void
   advance: () => void
   retreat: () => void
   acknowledgeResult: () => void
@@ -51,14 +69,30 @@ function getDungeon(id: string): DungeonDef {
   return dungeon
 }
 
+function cloneRun(run: RunState): RunState {
+  return { ...run, encounters: run.encounters.map((enc) => enc.map((e) => ({ ...e }))) }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   player: initialPlayer,
   run: null,
   currentQuestion: null,
   feedback: null,
   lastResult: null,
-  view: 'list',
+  view: 'title',
   phase: 'question',
+  windUpArmed: false,
+
+  enterHub: () => set({ view: 'hub' }),
+  enterMap: () => set({ view: 'list' }),
+
+  setPlayerName: (name) => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const newPlayer = { ...get().player, name: trimmed }
+    set({ player: newPlayer })
+    persist(newPlayer)
+  },
 
   startRun: (dungeonId) => {
     const dungeon = getDungeon(dungeonId)
@@ -77,6 +111,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       usedQuestionIds: [],
       xpAccumulated: 0,
       status: 'active',
+      enemyStunned: false,
+      charged: false,
     }
 
     set({
@@ -87,43 +123,54 @@ export const useGameStore = create<GameStore>((set, get) => ({
       lastResult: null,
       view: 'run',
       phase: 'question',
+      windUpArmed: false,
     })
   },
 
   answerQuestion: (selectedIndex) => {
-    const { run, currentQuestion, player } = get()
+    const { run, currentQuestion, player, windUpArmed } = get()
     if (!run || !currentQuestion || run.status !== 'active') return
 
     const correct = selectedIndex === currentQuestion.correctIndex
     const newPlayer: PlayerState = { ...player, subjectStats: { ...player.subjectStats } }
     recordAnswer(newPlayer, currentQuestion.subject, correct)
 
-    const newRun: RunState = {
-      ...run,
-      usedQuestionIds: [...run.usedQuestionIds, currentQuestion.id],
-      encounters: run.encounters.map((enc) => enc.map((e) => ({ ...e }))),
-    }
-
+    const newRun = cloneRun(run)
     const enemy = newRun.encounters[newRun.encounterIndex][newRun.currentEnemyIndex]
-    let damage = 0
+    let message = ''
+    let tone: Tone = 'neutral'
+    let target: Feedback['target'] = 'none'
     let enemyDefeated = false
-    let encounterCleared = false
 
     if (correct) {
-      damage = rollDamage(getAttackPower(newPlayer))
-      enemy.currentHp = Math.max(0, enemy.currentHp - damage)
+      let dmg = rollDamage(getAttackPower(newPlayer))
+      if (newRun.charged) {
+        dmg = Math.round(dmg * WINDUP_BONUS_MULTIPLIER)
+        newRun.charged = false
+        message = `Charged hit for ${dmg}!`
+      } else {
+        message = `Hit for ${dmg}!`
+      }
+      if (windUpArmed) {
+        newRun.charged = true
+        message += ' Charging next attack...'
+      }
+      enemy.currentHp = Math.max(0, enemy.currentHp - dmg)
+      target = 'enemy'
+      tone = 'good'
 
       if (enemy.currentHp <= 0) {
         enemyDefeated = true
+        message += ' Defeated!'
         newRun.defeatedCount += 1
         newRun.xpAccumulated += xpForEnemy(enemy.difficulty)
+        newRun.enemyStunned = false
 
         const encounter = newRun.encounters[newRun.encounterIndex]
         const nextEnemyIndex = newRun.currentEnemyIndex + 1
         if (nextEnemyIndex < encounter.length) {
           newRun.currentEnemyIndex = nextEnemyIndex
         } else {
-          encounterCleared = true
           const nextEncounterIndex = newRun.encounterIndex + 1
           if (nextEncounterIndex < newRun.encounters.length) {
             newRun.encounterIndex = nextEncounterIndex
@@ -135,18 +182,108 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       }
     } else {
-      damage = rollDamage(enemy.damage)
-      newPlayer.currentHp = Math.max(0, player.currentHp - damage)
-      if (newPlayer.currentHp <= 0) {
-        newRun.status = 'failed'
+      let dmg = rollDamage(enemy.damage)
+      if (windUpArmed) dmg = Math.round(dmg * WINDUP_WRONG_MULTIPLIER)
+
+      if (newRun.enemyStunned) {
+        dmg = 0
+        newRun.enemyStunned = false
+        message = 'Enemy is stunned - no damage taken!'
+        tone = 'neutral'
+      } else {
+        message = windUpArmed ? `Wind-up backfired! -${dmg} HP` : `Missed! -${dmg} HP`
+        tone = 'bad'
       }
+      newPlayer.currentHp = Math.max(0, player.currentHp - dmg)
+      target = 'player'
+      if (newPlayer.currentHp <= 0) newRun.status = 'failed'
     }
 
     set({
       run: newRun,
       player: newPlayer,
-      feedback: { correct, damage, target: correct ? 'enemy' : 'player', enemyDefeated, encounterCleared },
+      feedback: { message, tone, target, enemyDefeated },
       phase: 'feedback',
+      windUpArmed: false,
+    })
+  },
+
+  armWindUp: () => {
+    const { phase, run } = get()
+    if (phase !== 'question' || !run || run.status !== 'active') return
+    set((s) => ({ windUpArmed: !s.windUpArmed }))
+  },
+
+  useBag: () => {
+    const { phase, run, player, currentQuestion } = get()
+    if (phase !== 'question' || !run || run.status !== 'active') return
+    if (player.potions <= 0) return
+
+    const maxHp = getMaxHp(player)
+    const healed = Math.min(maxHp - player.currentHp, Math.round(maxHp * BAG_HEAL_FRACTION))
+    const newPlayer: PlayerState = { ...player, potions: player.potions - 1, currentHp: player.currentHp + healed }
+    const newRun = currentQuestion ? { ...run, usedQuestionIds: [...run.usedQuestionIds, currentQuestion.id] } : run
+
+    set({
+      run: newRun,
+      player: newPlayer,
+      feedback: { message: `Drank a potion, healed ${healed} HP.`, tone: 'good', target: 'player', enemyDefeated: false },
+      phase: 'feedback',
+      windUpArmed: false,
+    })
+  },
+
+  useDodge: () => {
+    const { phase, run, player, currentQuestion } = get()
+    if (phase !== 'question' || !run || run.status !== 'active') return
+
+    const newRun = cloneRun(run)
+    if (currentQuestion) newRun.usedQuestionIds = [...newRun.usedQuestionIds, currentQuestion.id]
+    const enemy = newRun.encounters[newRun.encounterIndex][newRun.currentEnemyIndex]
+    const success = Math.random() < DODGE_CHANCE
+    let newPlayer = player
+    let message: string
+    let tone: Tone
+
+    if (success) {
+      message = 'Dodged the attack!'
+      tone = 'good'
+    } else {
+      const dmg = rollDamage(enemy.damage)
+      newPlayer = { ...player, currentHp: Math.max(0, player.currentHp - dmg) }
+      message = `Failed to dodge! -${dmg} HP`
+      tone = 'bad'
+      if (newPlayer.currentHp <= 0) newRun.status = 'failed'
+    }
+
+    set({
+      run: newRun,
+      player: newPlayer,
+      feedback: { message, tone, target: success ? 'none' : 'player', enemyDefeated: false },
+      phase: 'feedback',
+      windUpArmed: false,
+    })
+  },
+
+  useStagger: () => {
+    const { phase, run, currentQuestion } = get()
+    if (phase !== 'question' || !run || run.status !== 'active') return
+
+    const newRun = cloneRun(run)
+    if (currentQuestion) newRun.usedQuestionIds = [...newRun.usedQuestionIds, currentQuestion.id]
+    const success = Math.random() < STAGGER_CHANCE
+    if (success) newRun.enemyStunned = true
+
+    set({
+      run: newRun,
+      feedback: {
+        message: success ? 'Staggered the enemy! Its next attack will whiff.' : 'Failed to stagger the enemy.',
+        tone: success ? 'good' : 'neutral',
+        target: 'none',
+        enemyDefeated: false,
+      },
+      phase: 'feedback',
+      windUpArmed: false,
     })
   },
 
@@ -229,10 +366,12 @@ function finalizeRun(get: () => GameStore, set: (partial: Partial<GameStore>) =>
 
   const xpGained = run.xpAccumulated
   let skillPointsGained = 0
+  let potionsGained = 0
   const lootGained: Item[] = []
 
   if (run.status === 'cleared') {
     skillPointsGained = skillPointsForTier(dungeon.tier)
+    potionsGained = POTIONS_PER_CLEAR
     const rolls = lootRollsForTier(dungeon.tier)
     const luck = getLootLuckPercent(player)
     for (let i = 0; i < rolls; i += 1) {
@@ -244,6 +383,7 @@ function finalizeRun(get: () => GameStore, set: (partial: Partial<GameStore>) =>
     ...player,
     xp: player.xp + xpGained,
     skillPoints: player.skillPoints + skillPointsGained,
+    potions: player.potions + potionsGained,
     inventory: [...player.inventory, ...lootGained],
     clearedRuns: player.clearedRuns + (run.status === 'cleared' ? 1 : 0),
   }

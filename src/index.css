@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --font-medieval: 'MedievalSharp', 'Cinzel', serif;
+}
+
 :root {
   color-scheme: dark;
 }
@@ -15,4 +19,30 @@ body {
   background: #0b0a10;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   image-rendering: pixelated;
+}
+
+@keyframes drift-slow {
+  0% {
+    transform: scale(1.15) translateX(-2.5%);
+  }
+  100% {
+    transform: scale(1.15) translateX(2.5%);
+  }
+}
+
+@keyframes drift-fast {
+  0% {
+    transform: scale(1.2) translateX(3%);
+  }
+  100% {
+    transform: scale(1.2) translateX(-3%);
+  }
+}
+
+.animate-drift-slow {
+  animation: drift-slow 22s ease-in-out infinite alternate;
+}
+
+.animate-drift-fast {
+  animation: drift-fast 14s ease-in-out infinite alternate;
 }

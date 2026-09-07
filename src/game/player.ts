@@ -49,12 +49,14 @@ export function getLootLuckPercent(player: PlayerState): number {
 
 export function createNewPlayer(): PlayerState {
   return {
+    name: 'Hero',
     level: 1,
     xp: 0,
     currentHp: 30,
     baseAttack: 5,
     baseMaxHp: 30,
     gold: 0,
+    potions: 1,
     skillPoints: 0,
     unlockedSkills: {},
     equipped: {},

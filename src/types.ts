@@ -87,15 +87,19 @@ export interface RunState {
   usedQuestionIds: string[]
   xpAccumulated: number
   status: 'active' | 'cleared' | 'failed'
+  enemyStunned: boolean // current enemy's next counter-hit is negated
+  charged: boolean // next successful hit deals bonus damage (from Wind Up)
 }
 
 export interface PlayerState {
+  name: string
   level: number
   xp: number
   currentHp: number
   baseAttack: number
   baseMaxHp: number
   gold: number
+  potions: number
   skillPoints: number
   unlockedSkills: Record<string, number> // skillId -> rank
   equipped: Partial<Record<ItemSlot, Item>>

@@ -6,25 +6,42 @@ import { SpriteSheet } from './SpriteSheet'
 const IDLE_SHEET: SpriteSheetDef = { src: '/sprites/player/idle.png', frameSize: 128, frameCount: 4, row: 0 }
 const ATTACK_SHEET: SpriteSheetDef = { src: '/sprites/player/attack.png', frameSize: 128, frameCount: 6, row: 0 }
 
-export function PlayerPanel({ attacking, hurt }: { attacking: boolean; hurt: boolean }) {
+interface Props {
+  attacking: boolean
+  hurt: boolean
+  charged?: boolean
+}
+
+// No card/border around the player, per design: only enemies get boxed cards.
+export function PlayerPanel({ attacking, hurt, charged }: Props) {
   const player = useGameStore((s) => s.player)
   const maxHp = getMaxHp(player)
   const hpPercent = Math.max(0, (player.currentHp / maxHp) * 100)
 
   return (
-    <div
-      className={`w-40 rounded-lg border-4 p-3 text-center shadow-lg transition ${hurt ? 'border-red-400 brightness-150' : 'border-sky-800'}`}
-      style={{ background: 'radial-gradient(circle at 50% 35%, #263041 0%, #17202c 55%, #0b0f16 100%)' }}
-    >
-      <div className="flex justify-center">
-        <SpriteSheet sheet={attacking ? ATTACK_SHEET : IDLE_SHEET} fps={attacking ? 12 : 6} playOnce={attacking} />
+    <div className={`w-48 text-center transition ${hurt ? 'brightness-150' : ''}`}>
+      <div
+        className={`flex h-40 w-40 items-center justify-center overflow-hidden drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)] ${hurt ? 'animate-pulse' : ''} ${
+          charged ? 'drop-shadow-[0_0_16px_rgba(56,189,248,0.8)]' : ''
+        }`}
+      >
+        <SpriteSheet
+          sheet={attacking ? ATTACK_SHEET : IDLE_SHEET}
+          fps={attacking ? 12 : 6}
+          playOnce={attacking}
+          scale={4.5}
+          className="shrink-0"
+        />
       </div>
-      <p className="mt-2 text-sm font-semibold text-stone-100">You</p>
-      <p className="text-xs text-stone-400">Attack {getAttackPower(player)}</p>
-      <div className="mt-2 h-2 w-full overflow-hidden rounded bg-stone-800">
+      <p className="font-medieval text-lg text-stone-100 drop-shadow-md">{player.name}</p>
+      <p className="text-xs text-amber-300 drop-shadow-md">
+        Attack {getAttackPower(player)}
+        {charged && <span className="ml-1 text-sky-300">(Charged!)</span>}
+      </p>
+      <div className="mx-auto mt-2 h-2 w-36 overflow-hidden rounded border border-black/40 bg-stone-900/70">
         <div className="h-full bg-sky-500 transition-all" style={{ width: `${hpPercent}%` }} />
       </div>
-      <p className="mt-1 text-xs text-stone-400">
+      <p className="mt-1 text-xs text-stone-200 drop-shadow-md">
         {player.currentHp}/{maxHp} HP
       </p>
     </div>

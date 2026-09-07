@@ -66,3 +66,11 @@ export function rollDamage(power: number): number {
 export function xpForEnemy(difficulty: number): number {
   return difficulty * 10
 }
+
+// Battle action tuning - adjust here if the balance feels off.
+export const DODGE_CHANCE = 0.5
+export const STAGGER_CHANCE = 0.5
+export const WINDUP_BONUS_MULTIPLIER = 1.75
+export const WINDUP_WRONG_MULTIPLIER = 1.6
+export const BAG_HEAL_FRACTION = 0.4
+export const POTIONS_PER_CLEAR = 1
