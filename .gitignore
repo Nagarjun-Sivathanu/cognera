@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Raw purchased asset library (zips/rars/aseprite sources) - not tracked.
+# Only the specific files actually used by the game live under public/sprites.
+/Assets
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

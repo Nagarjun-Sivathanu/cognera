@@ -13,10 +13,18 @@ export interface Question {
   explanation?: string
 }
 
+export interface SpriteSheetDef {
+  src: string // path under /sprites
+  frameSize: number // square frame width/height in px
+  frameCount: number // columns to cycle through for this animation
+  row?: number // which row of the sheet (0-indexed), default 0
+}
+
 export interface EnemyDef {
   id: string
   name: string
-  sprite: string // emoji placeholder or asset path; swap for real art later
+  sprite: SpriteSheetDef
+  flip?: boolean // mirror horizontally so the sprite faces the player
   difficulty: number // 1-5, used for encounter budget math
   baseHp: number
   baseDamage: number
@@ -60,7 +68,8 @@ export interface EnemyInstance {
   instanceId: string
   defId: string
   name: string
-  sprite: string
+  sprite: SpriteSheetDef
+  flip?: boolean
   difficulty: number
   maxHp: number
   currentHp: number

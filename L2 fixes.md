@@ -1,0 +1,8 @@
+# Battle screen : 
+In our battle screen we will start with some ui/ux changes there where the screen is split into two in the lenght wise where the top half is used for displaying the ennimes and our charector where the left hand side is used for our charectors like our team where they will be also remove that rectangular border around it and oppositley for the the enimes instead of keeping them in a straight line we iwll keep them in  a stagred formation 
+
+While the buttom half is used it split in half in the retro style like the same pixel medival style if u want a pac i think theyre is one clalled "UI_Wood_Fonts" and simular fornt formats and such u can use it where split in two one half to select the iteams use or what u want to do like white kind of move and stuff where the other half has the quiz questions 
+
+# Main screen and genral ui :
+
+U need to math it and use the format pacs and get them like simular to a like a 2d medivalish dungen ish game vube like the retro elments instead of it haveing such a basic screen as it is rn Also use the parllax background caves as the tittle screen and like have it changein like a nimation in order to give it a changeing motion effect like have a dugen  mode under which there is a caveish vibed parlax one and do these options and stuff like points on a map or smth like that where we click to get into the dungen and we can play there and stuff 

@@ -1,17 +1,23 @@
-// Placeholder gradients standing in for the user's owned corridor background art.
-// Swap `gradient` for a `url(...)` background-image once real assets are dropped in.
-export const BACKGROUNDS: Record<string, { label: string; gradient: string }> = {
+// Real cave art (base scene + a rocky vignette layer), tinted per id for cheap
+// variety during background rotation without needing separate art per corridor.
+export const BACKGROUNDS: Record<string, { label: string; base: string; vignette: string; filter: string }> = {
   'corridor-1': {
     label: 'Torchlit Corridor',
-    gradient: 'radial-gradient(circle at 50% 30%, #4a3423 0%, #241a12 55%, #0d0a07 100%)',
+    base: '/sprites/backgrounds/cave/0.png',
+    vignette: '/sprites/backgrounds/cave/1.png',
+    filter: 'none',
   },
   'corridor-2': {
     label: 'Mossy Passage',
-    gradient: 'radial-gradient(circle at 50% 30%, #2f3b2a 0%, #1a2116 55%, #0a0d08 100%)',
+    base: '/sprites/backgrounds/cave/0.png',
+    vignette: '/sprites/backgrounds/cave/1.png',
+    filter: 'hue-rotate(60deg) saturate(1.2)',
   },
   'corridor-3': {
     label: 'Blood-lit Hall',
-    gradient: 'radial-gradient(circle at 50% 30%, #4a1f1f 0%, #241010 55%, #0d0505 100%)',
+    base: '/sprites/backgrounds/cave/0.png',
+    vignette: '/sprites/backgrounds/cave/1.png',
+    filter: 'hue-rotate(-30deg) saturate(1.3) brightness(0.95)',
   },
 }
 

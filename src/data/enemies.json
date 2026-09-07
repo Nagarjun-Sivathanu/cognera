@@ -1,12 +1,12 @@
 [
-  { "id": "rat", "name": "Sewer Rat", "sprite": "🐀", "difficulty": 1, "baseHp": 8, "baseDamage": 2 },
-  { "id": "bat", "name": "Cave Bat", "sprite": "🦇", "difficulty": 1, "baseHp": 6, "baseDamage": 3 },
-  { "id": "skeleton", "name": "Bone Skeleton", "sprite": "💀", "difficulty": 2, "baseHp": 14, "baseDamage": 4 },
-  { "id": "goblin", "name": "Sneaky Goblin", "sprite": "👺", "difficulty": 2, "baseHp": 12, "baseDamage": 5 },
-  { "id": "wolf", "name": "Shadow Wolf", "sprite": "🐺", "difficulty": 3, "baseHp": 22, "baseDamage": 6 },
-  { "id": "bandit", "name": "Highway Bandit", "sprite": "🗡️", "difficulty": 3, "baseHp": 20, "baseDamage": 7 },
-  { "id": "direwolf", "name": "Dire Wolf", "sprite": "🐺", "difficulty": 4, "baseHp": 32, "baseDamage": 9 },
-  { "id": "redknight", "name": "Crimson Knight", "sprite": "⚔️", "difficulty": 4, "baseHp": 30, "baseDamage": 10 },
-  { "id": "minotaur", "name": "Minotaur", "sprite": "🐂", "difficulty": 5, "baseHp": 50, "baseDamage": 14 },
-  { "id": "rider", "name": "Crimson Rider", "sprite": "🐎", "difficulty": 5, "baseHp": 48, "baseDamage": 13 }
+  { "id": "rabbit", "name": "Field Rabbit", "sprite": { "src": "/sprites/enemies/rabbit-idle.png", "frameSize": 128, "frameCount": 4, "row": 0 }, "difficulty": 1, "baseHp": 8, "baseDamage": 2 },
+  { "id": "rabbit-horned", "name": "Horned Rabbit", "sprite": { "src": "/sprites/enemies/rabbit-horned-idle.png", "frameSize": 128, "frameCount": 4, "row": 0 }, "difficulty": 1, "baseHp": 10, "baseDamage": 3 },
+  { "id": "zombie5", "name": "Shambling Zombie", "sprite": { "src": "/sprites/enemies/zombie5-idle.png", "frameSize": 128, "frameCount": 4, "row": 0 }, "difficulty": 2, "baseHp": 16, "baseDamage": 4 },
+  { "id": "zombie6", "name": "Bloated Zombie", "sprite": { "src": "/sprites/enemies/zombie6-idle.png", "frameSize": 128, "frameCount": 4, "row": 0 }, "difficulty": 2, "baseHp": 18, "baseDamage": 5 },
+  { "id": "cat", "name": "Renegade Cat", "sprite": { "src": "/sprites/enemies/cat-idle.png", "frameSize": 128, "frameCount": 5, "row": 0 }, "flip": true, "difficulty": 3, "baseHp": 24, "baseDamage": 7 },
+  { "id": "badger", "name": "War Badger", "sprite": { "src": "/sprites/enemies/badger-idle.png", "frameSize": 128, "frameCount": 5, "row": 0 }, "flip": true, "difficulty": 3, "baseHp": 26, "baseDamage": 7 },
+  { "id": "frogger", "name": "Bog Frogger", "sprite": { "src": "/sprites/enemies/frogger-idle.png", "frameSize": 128, "frameCount": 5, "row": 0 }, "flip": true, "difficulty": 4, "baseHp": 34, "baseDamage": 9 },
+  { "id": "pengu", "name": "Frost Pengu", "sprite": { "src": "/sprites/enemies/pengu-idle.png", "frameSize": 128, "frameCount": 5, "row": 0 }, "flip": true, "difficulty": 4, "baseHp": 34, "baseDamage": 10 },
+  { "id": "dino", "name": "Dino Tri", "sprite": { "src": "/sprites/enemies/dino-idle.png", "frameSize": 128, "frameCount": 18, "row": 0 }, "flip": true, "difficulty": 4, "baseHp": 38, "baseDamage": 11 },
+  { "id": "gollux", "name": "Gollux", "sprite": { "src": "/sprites/enemies/gollux-idle.png", "frameSize": 128, "frameCount": 5, "row": 0 }, "flip": true, "difficulty": 5, "baseHp": 55, "baseDamage": 14 }
 ]

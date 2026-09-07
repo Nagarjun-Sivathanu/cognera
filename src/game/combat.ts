@@ -21,6 +21,7 @@ function toInstance(def: EnemyDef): EnemyInstance {
     defId: def.id,
     name: def.name,
     sprite: def.sprite,
+    flip: def.flip,
     difficulty: def.difficulty,
     maxHp: def.baseHp,
     currentHp: def.baseHp,

@@ -4,6 +4,7 @@ import { getBackground } from '../game/backgrounds'
 import { useGameStore } from '../store/gameStore'
 import type { DungeonDef } from '../types'
 import { EnemyCard } from './EnemyCard'
+import { PlayerPanel } from './PlayerPanel'
 import { QuestionCard } from './QuestionCard'
 import { ResultModal } from './ResultModal'
 
@@ -39,9 +40,21 @@ export function RunScreen() {
   const backgroundId = dungeon.backgrounds[run.backgroundIndex % dungeon.backgrounds.length]
   const bg = getBackground(backgroundId)
 
+  const playerAttacking = phase === 'feedback' && feedback?.target === 'enemy'
+  const playerHurt = phase === 'feedback' && feedback?.target === 'player'
+
   return (
-    <div className="flex min-h-[calc(100vh-64px)] flex-col" style={{ background: bg.gradient }}>
-      <div className="flex items-center justify-between px-6 py-3 text-stone-300">
+    <div className="relative flex min-h-[calc(100vh-64px)] flex-col overflow-hidden" style={{ filter: bg.filter }}>
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bg.base})`, imageRendering: 'pixelated' }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bg.vignette})`, imageRendering: 'pixelated' }}
+      />
+
+      <div className="relative z-10 flex items-center justify-between px-6 py-3 text-stone-300">
         <div>
           <p className="text-sm font-semibold">{dungeon.name}</p>
           <p className="text-xs text-stone-400">
@@ -57,14 +70,17 @@ export function RunScreen() {
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
-        {/* enemy queue preview */}
-        <div className="flex items-end gap-3">
-          {encounter.map((enemy, i) => (
-            <div key={enemy.instanceId} className={i === run.currentEnemyIndex ? 'scale-110' : 'opacity-50 grayscale'}>
-              <EnemyCard enemy={enemy} hitFlash={feedback?.target === 'enemy' && i === run.currentEnemyIndex && feedback !== null} />
-            </div>
-          ))}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 px-6">
+        {/* battlefield: player vs enemy queue */}
+        <div className="flex items-end gap-6">
+          <PlayerPanel attacking={playerAttacking} hurt={playerHurt} />
+          <div className="flex items-end gap-3">
+            {encounter.map((enemy, i) => (
+              <div key={enemy.instanceId} className={i === run.currentEnemyIndex ? 'scale-110' : 'opacity-50 grayscale'}>
+                <EnemyCard enemy={enemy} hitFlash={feedback?.target === 'enemy' && i === run.currentEnemyIndex && feedback !== null} />
+              </div>
+            ))}
+          </div>
         </div>
 
         {feedback && (
