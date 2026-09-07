@@ -1,0 +1,5 @@
+[
+  { "id": "sharp-mind", "name": "Sharp Mind", "description": "+2 Attack per rank", "maxRank": 5, "cost": 1, "effect": { "stat": "attack", "perRank": 2 } },
+  { "id": "iron-will", "name": "Iron Will", "description": "+10 Max HP per rank", "maxRank": 5, "cost": 1, "effect": { "stat": "hp", "perRank": 10 } },
+  { "id": "quick-study", "name": "Quick Study", "description": "+4% better loot odds per rank", "maxRank": 5, "cost": 2, "effect": { "stat": "lootLuck", "perRank": 4 } }
+]

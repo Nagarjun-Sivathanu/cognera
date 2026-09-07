@@ -1,0 +1,46 @@
+[
+  {
+    "id": "crypt-easy",
+    "name": "Forgotten Crypt",
+    "tier": "Easy",
+    "subjects": ["Math", "Science"],
+    "topics": ["Arithmetic", "Fractions", "Biology", "Earth Science"],
+    "encounterCount": 3,
+    "budgetRange": [1, 2],
+    "backgrounds": ["corridor-1", "corridor-2"],
+    "requiredLevel": 1
+  },
+  {
+    "id": "catacombs-medium",
+    "name": "Sunken Catacombs",
+    "tier": "Medium",
+    "subjects": ["Math", "Science"],
+    "topics": ["Multiplication", "Algebra", "Chemistry", "Physics"],
+    "encounterCount": 4,
+    "budgetRange": [2, 4],
+    "backgrounds": ["corridor-1", "corridor-2", "corridor-3"],
+    "requiredLevel": 3
+  },
+  {
+    "id": "keep-moderate",
+    "name": "Ashen Keep",
+    "tier": "Moderate",
+    "subjects": ["Math", "Science"],
+    "topics": ["Algebra", "Geometry", "Physics", "Biology"],
+    "encounterCount": 5,
+    "budgetRange": [4, 6],
+    "backgrounds": ["corridor-2", "corridor-3"],
+    "requiredLevel": 6
+  },
+  {
+    "id": "citadel-hard",
+    "name": "Blood Citadel",
+    "tier": "Hard",
+    "subjects": ["Math", "Science"],
+    "topics": ["Quadratics", "Trigonometry", "Physics", "Chemistry"],
+    "encounterCount": 6,
+    "budgetRange": [6, 9],
+    "backgrounds": ["corridor-3", "corridor-1"],
+    "requiredLevel": 10
+  }
+]

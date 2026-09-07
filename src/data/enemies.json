@@ -1,0 +1,12 @@
+[
+  { "id": "rat", "name": "Sewer Rat", "sprite": "🐀", "difficulty": 1, "baseHp": 8, "baseDamage": 2 },
+  { "id": "bat", "name": "Cave Bat", "sprite": "🦇", "difficulty": 1, "baseHp": 6, "baseDamage": 3 },
+  { "id": "skeleton", "name": "Bone Skeleton", "sprite": "💀", "difficulty": 2, "baseHp": 14, "baseDamage": 4 },
+  { "id": "goblin", "name": "Sneaky Goblin", "sprite": "👺", "difficulty": 2, "baseHp": 12, "baseDamage": 5 },
+  { "id": "wolf", "name": "Shadow Wolf", "sprite": "🐺", "difficulty": 3, "baseHp": 22, "baseDamage": 6 },
+  { "id": "bandit", "name": "Highway Bandit", "sprite": "🗡️", "difficulty": 3, "baseHp": 20, "baseDamage": 7 },
+  { "id": "direwolf", "name": "Dire Wolf", "sprite": "🐺", "difficulty": 4, "baseHp": 32, "baseDamage": 9 },
+  { "id": "redknight", "name": "Crimson Knight", "sprite": "⚔️", "difficulty": 4, "baseHp": 30, "baseDamage": 10 },
+  { "id": "minotaur", "name": "Minotaur", "sprite": "🐂", "difficulty": 5, "baseHp": 50, "baseDamage": 14 },
+  { "id": "rider", "name": "Crimson Rider", "sprite": "🐎", "difficulty": 5, "baseHp": 48, "baseDamage": 13 }
+]
