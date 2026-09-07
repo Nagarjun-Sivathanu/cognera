@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { BGM, playBgm, playSfx, SFX } from '../game/audio'
 import {
   BAG_HEAL_FRACTION,
   DODGE_CHANCE,
@@ -85,10 +86,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
   windUpArmed: false,
   selectedSubjectId: null,
 
-  enterHub: () => set({ view: 'hub' }),
-  enterMap: () => set({ view: 'subjects' }),
-  selectSubject: (subjectId) => set({ selectedSubjectId: subjectId, view: 'list' }),
-  backToSubjects: () => set({ view: 'subjects', selectedSubjectId: null }),
+  enterHub: () => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.menu)
+    set({ view: 'hub' })
+  },
+  enterMap: () => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.menu)
+    set({ view: 'subjects' })
+  },
+  selectSubject: (subjectId) => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.menu)
+    set({ selectedSubjectId: subjectId, view: 'list' })
+  },
+  backToSubjects: () => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.menu)
+    set({ view: 'subjects', selectedSubjectId: null })
+  },
 
   setPlayerName: (name) => {
     const trimmed = name.trim()
@@ -99,6 +116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   startRun: (dungeonId) => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.cave)
     const dungeon = getDungeon(dungeonId)
     const player = get().player
     const maxHp = getMaxHp(player)
@@ -162,6 +181,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       enemy.currentHp = Math.max(0, enemy.currentHp - dmg)
       target = 'enemy'
       tone = 'good'
+      playSfx(enemy.difficulty >= 5 ? SFX.bossGettingHit : SFX.mobGettingHit)
 
       if (enemy.currentHp <= 0) {
         enemyDefeated = true
@@ -200,7 +220,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
       newPlayer.currentHp = Math.max(0, player.currentHp - dmg)
       target = 'player'
-      if (newPlayer.currentHp <= 0) newRun.status = 'failed'
+      if (newPlayer.currentHp <= 0) {
+        newRun.status = 'failed'
+        playSfx(SFX.playerDeathblow)
+      } else {
+        playSfx(SFX.mobDoingDamage)
+      }
     }
 
     set({
@@ -257,7 +282,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newPlayer = { ...player, currentHp: Math.max(0, player.currentHp - dmg) }
       message = `Failed to dodge! -${dmg} HP`
       tone = 'bad'
-      if (newPlayer.currentHp <= 0) newRun.status = 'failed'
+      if (newPlayer.currentHp <= 0) {
+        newRun.status = 'failed'
+        playSfx(SFX.playerDeathblow)
+      } else {
+        playSfx(SFX.mobDoingDamage)
+      }
     }
 
     set({
@@ -309,11 +339,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   retreat: () => {
     const { run } = get()
     if (!run || run.status !== 'active') return
+    playSfx(SFX.menuClick)
     set({ run: { ...run, status: 'failed' } })
     finalizeRun(get, set)
   },
 
   acknowledgeResult: () => {
+    playSfx(SFX.menuClick)
+    playBgm(BGM.menu)
     set({ view: 'list', run: null, currentQuestion: null, feedback: null, lastResult: null, phase: 'question' })
   },
 

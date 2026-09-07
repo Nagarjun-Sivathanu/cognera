@@ -9,8 +9,9 @@ import { ResultModal } from './ResultModal'
 
 const FEEDBACK_DELAY_MS = 1100
 
-// Zigzag vertical offsets so enemies don't sit in a flat line.
-const STAGGER_OFFSETS = [0, 28, -12, 18, -4]
+// Zigzag offsets (bottom-aligned baseline, so only upward/positive values) so
+// enemies don't sit in a flat line.
+const STAGGER_OFFSETS = [0, 26, 8, 20, 4]
 
 const TONE_COLOR: Record<string, string> = {
   good: 'text-emerald-400',
@@ -73,7 +74,7 @@ export function RunScreen() {
           </p>
         </div>
 
-        <div className="relative z-10 flex h-full items-center justify-between gap-4 px-6">
+        <div className="relative z-10 flex h-full items-end justify-between gap-4 px-6 pb-8">
           <PlayerPanel attacking={playerAttacking} hurt={playerHurt} charged={run.charged} />
 
           <div className="flex items-end gap-4 pr-4">
@@ -152,7 +153,7 @@ export function RunScreen() {
 
         <div className="flex items-center justify-center overflow-y-auto bg-[#1c140c] p-2">
           {currentQuestion && (
-            <div className="w-full max-w-xl">
+            <div className="h-full w-full">
               <QuestionCard question={currentQuestion} answering={phase === 'question'} onAnswer={answerQuestion} />
             </div>
           )}

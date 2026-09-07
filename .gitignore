@@ -16,6 +16,9 @@ dist-ssr
 # Only the specific files actually used by the game live under public/sprites.
 /Assets
 
+# Raw sound source files - the served copies live under public/sounds.
+/sounds
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

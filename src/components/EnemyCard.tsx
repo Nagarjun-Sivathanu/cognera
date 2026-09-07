@@ -7,25 +7,22 @@ interface Props {
   stunned?: boolean
 }
 
+// No card/border, matching the player's look: just sprite + name + HP bar.
 export function EnemyCard({ enemy, hitFlash, stunned }: Props) {
   const hpPercent = Math.max(0, (enemy.currentHp / enemy.maxHp) * 100)
 
   return (
-    <div
-      className={`relative flex w-56 flex-col items-center rounded-lg border-4 p-2.5 text-center shadow-lg transition ${
-        hitFlash ? 'border-red-400 brightness-150' : stunned ? 'border-sky-400' : 'border-red-800'
-      }`}
-      style={{
-        background:
-          'radial-gradient(circle at 50% 35%, #3a3a3a 0%, #262626 55%, #141414 100%)',
-      }}
-    >
+    <div className={`w-56 text-center transition ${hitFlash ? 'brightness-150' : ''}`}>
       {stunned && (
-        <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded bg-sky-900 px-2 py-0.5 text-[10px] uppercase tracking-wide text-sky-200">
+        <span className="rounded bg-sky-900/90 px-2 py-0.5 text-[10px] uppercase tracking-wide text-sky-200">
           Stunned
         </span>
       )}
-      <div className="flex h-[132px] w-[132px] items-center justify-center overflow-hidden">
+      <div
+        className={`mx-auto flex h-[132px] w-[132px] items-center justify-center overflow-hidden drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)] ${
+          stunned ? 'drop-shadow-[0_0_16px_rgba(56,189,248,0.8)]' : ''
+        } ${hitFlash ? 'animate-pulse' : ''}`}
+      >
         <SpriteSheet
           sheet={enemy.sprite}
           flip={enemy.flip}
@@ -34,12 +31,12 @@ export function EnemyCard({ enemy, hitFlash, stunned }: Props) {
           className="shrink-0"
         />
       </div>
-      <p className="font-medieval mt-2 truncate text-sm text-stone-100">{enemy.name}</p>
-      <p className="text-xs text-stone-400">Difficulty {enemy.difficulty}</p>
-      <div className="mt-2 h-2 w-full overflow-hidden rounded bg-stone-800">
+      <p className="font-medieval text-sm text-stone-100 drop-shadow-md">{enemy.name}</p>
+      <p className="text-xs text-stone-300 drop-shadow-md">Difficulty {enemy.difficulty}</p>
+      <div className="mx-auto mt-2 h-2 w-40 overflow-hidden rounded border border-black/40 bg-stone-900/70">
         <div className="h-full bg-red-500 transition-all" style={{ width: `${hpPercent}%` }} />
       </div>
-      <p className="mt-1 text-xs text-stone-400">
+      <p className="mt-1 text-xs text-stone-200 drop-shadow-md">
         {enemy.currentHp}/{enemy.maxHp} HP
       </p>
     </div>

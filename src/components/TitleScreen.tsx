@@ -1,7 +1,13 @@
+import { useEffect } from 'react'
+import { BGM, playBgm } from '../game/audio'
 import { useGameStore } from '../store/gameStore'
 
 export function TitleScreen() {
   const enterHub = useGameStore((s) => s.enterHub)
+
+  useEffect(() => {
+    playBgm(BGM.cave)
+  }, [])
 
   return (
     <div className="relative flex h-screen w-full items-center justify-center overflow-hidden">
