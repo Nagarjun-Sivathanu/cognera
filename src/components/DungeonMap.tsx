@@ -1,17 +1,15 @@
 import { useState } from 'react'
-import dungeonsData from '../data/dungeons.json'
+import { dungeonsForSubject, SUBJECTS, TIER_CONFIG } from '../game/dungeonLayout'
 import { getLevel } from '../game/player'
 import { useGameStore } from '../store/gameStore'
 import type { DifficultyTier, DungeonDef } from '../types'
 
-const dungeons = dungeonsData as DungeonDef[]
-
-// Hand-placed positions (percent of container) forming a winding path across the map.
-const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
-  'crypt-easy': { x: 16, y: 78 },
-  'catacombs-medium': { x: 38, y: 56 },
-  'keep-moderate': { x: 63, y: 62 },
-  'citadel-hard': { x: 85, y: 30 },
+// Scattered points, one per tier - no implied order or progression between them.
+const NODE_POSITIONS: Record<DifficultyTier, { x: number; y: number }> = {
+  Easy: { x: 20, y: 70 },
+  Medium: { x: 45, y: 32 },
+  Moderate: { x: 72, y: 62 },
+  Hard: { x: 85, y: 24 },
 }
 
 const TIER_RING: Record<DifficultyTier, string> = {
@@ -33,7 +31,7 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
   const startRun = useGameStore((s) => s.startRun)
   const playerLevel = useGameStore((s) => getLevel(s.player.xp))
   const locked = playerLevel < dungeon.requiredLevel
-  const pos = NODE_POSITIONS[dungeon.id] ?? { x: 50, y: 50 }
+  const pos = NODE_POSITIONS[dungeon.tier]
 
   return (
     <div
@@ -50,14 +48,16 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
       >
         <span className="font-medieval text-2xl text-stone-100">{TIER_NUMERAL[dungeon.tier]}</span>
       </button>
-      <p className="font-medieval mt-1 text-center text-sm text-stone-200 drop-shadow-md">{dungeon.name}</p>
+      <p className="font-medieval mt-1 text-center text-sm text-stone-200 drop-shadow-md">{dungeon.tier}</p>
 
       {hovered && (
-        <div className="absolute left-1/2 top-full z-20 mt-2 w-56 -translate-x-1/2 rounded-md border border-stone-700 bg-stone-950 p-3 text-sm text-stone-300 shadow-xl">
+        <div className="absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-md border border-stone-700 bg-stone-950 p-3 text-sm text-stone-300 shadow-xl">
           <p className="font-semibold text-stone-100">
             {dungeon.tier} · Lv {dungeon.requiredLevel}+
           </p>
-          <p className="mt-1">{dungeon.topics.join(', ')}</p>
+          <p className="mt-1 text-stone-400">{TIER_CONFIG[dungeon.tier].description}</p>
+          <p className="mt-2 font-semibold text-stone-100">Topics covered</p>
+          <p className="mt-0.5">{dungeon.topics.join(', ')}</p>
           {locked && <p className="mt-2 text-red-400">Locked — reach level {dungeon.requiredLevel}.</p>}
         </div>
       )}
@@ -66,9 +66,10 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
 }
 
 export function DungeonMap() {
-  const orderedIds = ['crypt-easy', 'catacombs-medium', 'keep-moderate', 'citadel-hard']
-  const points = orderedIds.map((id) => NODE_POSITIONS[id])
-  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+  const selectedSubjectId = useGameStore((s) => s.selectedSubjectId)
+  const backToSubjects = useGameStore((s) => s.backToSubjects)
+  const subject = SUBJECTS.find((s) => s.id === selectedSubjectId)
+  const dungeons = selectedSubjectId ? dungeonsForSubject(selectedSubjectId) : []
 
   return (
     <div className="relative h-[calc(100vh-64px)] w-full overflow-hidden">
@@ -78,9 +79,19 @@ export function DungeonMap() {
       />
       <div className="absolute inset-0 bg-black/35" />
 
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path d={pathD} fill="none" stroke="#d97706" strokeWidth="0.4" strokeDasharray="2,2" opacity="0.6" />
-      </svg>
+      <div className="relative z-10 flex items-center justify-between px-4 py-3">
+        <div>
+          <p className="font-medieval text-lg text-amber-200 drop-shadow-md">{subject?.subject ?? 'Dungeons'}</p>
+          <p className="text-xs text-stone-300 drop-shadow-md">{subject?.name}</p>
+        </div>
+        <button
+          type="button"
+          onClick={backToSubjects}
+          className="font-medieval rounded border border-stone-600 bg-stone-900/70 px-3 py-1.5 text-sm text-stone-200 hover:bg-stone-800"
+        >
+          ← Subjects
+        </button>
+      </div>
 
       {dungeons.map((d) => (
         <DungeonNode key={d.id} dungeon={d} />

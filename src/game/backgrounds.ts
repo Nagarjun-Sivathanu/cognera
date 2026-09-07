@@ -1,26 +1,20 @@
-// Real cave art (base scene + a rocky vignette layer), tinted per id for cheap
-// variety during background rotation without needing separate art per corridor.
-export const BACKGROUNDS: Record<string, { label: string; base: string; vignette: string; filter: string }> = {
-  'corridor-1': {
-    label: 'Torchlit Corridor',
-    base: '/sprites/backgrounds/cave/0.png',
-    vignette: '/sprites/backgrounds/cave/1.png',
-    filter: 'none',
-  },
-  'corridor-2': {
-    label: 'Mossy Passage',
-    base: '/sprites/backgrounds/cave/0.png',
-    vignette: '/sprites/backgrounds/cave/1.png',
-    filter: 'hue-rotate(60deg) saturate(1.2)',
-  },
-  'corridor-3': {
-    label: 'Blood-lit Hall',
-    base: '/sprites/backgrounds/cave/0.png',
-    vignette: '/sprites/backgrounds/cave/1.png',
-    filter: 'hue-rotate(-30deg) saturate(1.3) brightness(0.95)',
-  },
+// Animated torch-lit dungeon corridor GIFs used as looping battle backgrounds.
+export const BACKGROUNDS: Record<string, { label: string; url: string }> = {
+  'torch-1': { label: 'Cobwebbed Hall', url: '/sprites/backgrounds/fight/torch-1.gif' },
+  'torch-2': { label: 'Column Corridor', url: '/sprites/backgrounds/fight/torch-2.gif' },
+  'torch-3': { label: 'Cracked Passage', url: '/sprites/backgrounds/fight/torch-3.gif' },
+  'torch-4': { label: 'Barred Archway', url: '/sprites/backgrounds/fight/torch-4.gif' },
+  'torch-5': { label: 'Torchlit Hall', url: '/sprites/backgrounds/fight/torch-5.gif' },
 }
 
+const BACKGROUND_IDS = Object.keys(BACKGROUNDS)
+
 export function getBackground(id: string) {
-  return BACKGROUNDS[id] ?? BACKGROUNDS['corridor-1']
+  return BACKGROUNDS[id] ?? BACKGROUNDS['torch-1']
 }
+
+export function randomBackgroundId(): string {
+  return BACKGROUND_IDS[Math.floor(Math.random() * BACKGROUND_IDS.length)]
+}
+
+export { BACKGROUND_IDS }

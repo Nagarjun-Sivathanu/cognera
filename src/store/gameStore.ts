@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import dungeonsData from '../data/dungeons.json'
 import {
   BAG_HEAL_FRACTION,
   DODGE_CHANCE,
@@ -11,13 +10,12 @@ import {
   WINDUP_WRONG_MULTIPLIER,
   xpForEnemy,
 } from '../game/combat'
+import { dungeons } from '../game/dungeonLayout'
 import { generateItem, lootRollsForTier, rollRarity, skillPointsForTier } from '../game/loot'
 import { createNewPlayer, getAttackPower, getLootLuckPercent, getMaxHp, recordAnswer, skills } from '../game/player'
 import { getQuestionForEnemy } from '../game/questions'
 import { localSaveService } from '../services/saveService'
 import type { DungeonDef, Item, ItemSlot, LastRunResult, PlayerState, Question, RunState } from '../types'
-
-const dungeons = dungeonsData as DungeonDef[]
 
 type Phase = 'question' | 'feedback' | 'result'
 type Tone = 'good' | 'bad' | 'neutral'
@@ -35,12 +33,15 @@ interface GameStore {
   currentQuestion: Question | null
   feedback: Feedback | null
   lastResult: LastRunResult | null
-  view: 'title' | 'hub' | 'list' | 'run'
+  view: 'title' | 'hub' | 'subjects' | 'list' | 'run'
   phase: Phase
   windUpArmed: boolean
+  selectedSubjectId: string | null
 
   enterHub: () => void
   enterMap: () => void
+  selectSubject: (subjectId: string) => void
+  backToSubjects: () => void
   setPlayerName: (name: string) => void
   startRun: (dungeonId: string) => void
   answerQuestion: (selectedIndex: number) => void
@@ -82,9 +83,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   view: 'title',
   phase: 'question',
   windUpArmed: false,
+  selectedSubjectId: null,
 
   enterHub: () => set({ view: 'hub' }),
-  enterMap: () => set({ view: 'list' }),
+  enterMap: () => set({ view: 'subjects' }),
+  selectSubject: (subjectId) => set({ selectedSubjectId: subjectId, view: 'list' }),
+  backToSubjects: () => set({ view: 'subjects', selectedSubjectId: null }),
 
   setPlayerName: (name) => {
     const trimmed = name.trim()

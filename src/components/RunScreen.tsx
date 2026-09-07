@@ -1,14 +1,11 @@
 import { useEffect } from 'react'
-import dungeonsData from '../data/dungeons.json'
 import { getBackground } from '../game/backgrounds'
+import { dungeons } from '../game/dungeonLayout'
 import { useGameStore } from '../store/gameStore'
-import type { DungeonDef } from '../types'
 import { EnemyCard } from './EnemyCard'
 import { PlayerPanel } from './PlayerPanel'
 import { QuestionCard } from './QuestionCard'
 import { ResultModal } from './ResultModal'
-
-const dungeons = dungeonsData as DungeonDef[]
 
 const FEEDBACK_DELAY_MS = 1100
 
@@ -62,15 +59,11 @@ export function RunScreen() {
 
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
-      {/* top half: battlefield */}
-      <div className="relative flex-1 overflow-hidden" style={{ filter: bg.filter }}>
+      {/* top: battlefield (takes remaining space) */}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bg.base})`, imageRendering: 'pixelated' }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bg.vignette})`, imageRendering: 'pixelated' }}
+          style={{ backgroundImage: `url(${bg.url})`, imageRendering: 'pixelated' }}
         />
 
         <div className="absolute left-3 top-2 z-10 text-stone-300">
@@ -101,13 +94,13 @@ export function RunScreen() {
         </div>
       </div>
 
-      {/* bottom half: command panel + question panel, retro wood-frame style */}
-      <div className="grid flex-1 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] overflow-hidden border-t-4 border-amber-950 bg-[#241a10]">
-        <div className="flex flex-col justify-between gap-2 overflow-y-auto border-r-4 border-amber-950 bg-[#2e2115] p-3">
+      {/* bottom: command panel + question panel, retro wood-frame style (kept compact) */}
+      <div className="grid h-56 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,2fr)] overflow-hidden border-t-4 border-amber-950 bg-[#241a10]">
+        <div className="flex flex-col justify-between gap-1.5 overflow-y-auto border-r-4 border-amber-950 bg-[#2e2115] p-2">
           <div className="text-center">
-            <p className="font-medieval text-xs uppercase tracking-wide text-amber-500">Target</p>
-            <p className="font-medieval text-base text-stone-100">{activeEnemy.name}</p>
-            {feedback && <p className={`mt-1 text-sm font-bold ${TONE_COLOR[feedback.tone]}`}>{feedback.message}</p>}
+            <p className="font-medieval text-[11px] uppercase tracking-wide text-amber-500">Target</p>
+            <p className="font-medieval text-sm text-stone-100">{activeEnemy.name}</p>
+            {feedback && <p className={`mt-0.5 text-xs font-bold ${TONE_COLOR[feedback.tone]}`}>{feedback.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-1.5">
@@ -157,7 +150,7 @@ export function RunScreen() {
           </button>
         </div>
 
-        <div className="flex items-center justify-center overflow-y-auto bg-[#1c140c] p-3">
+        <div className="flex items-center justify-center overflow-y-auto bg-[#1c140c] p-2">
           {currentQuestion && (
             <div className="w-full max-w-xl">
               <QuestionCard question={currentQuestion} answering={phase === 'question'} onAnswer={answerQuestion} />

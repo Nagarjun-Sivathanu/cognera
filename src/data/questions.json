@@ -10,14 +10,16 @@
   { "id": "math-5a", "subject": "Math", "topic": "Quadratics", "difficulty": 5, "question": "What are the roots of x^2 - 5x + 6 = 0?", "options": ["1 and 6", "2 and 3", "-2 and -3", "0 and 5"], "correctIndex": 1 },
   { "id": "math-5b", "subject": "Math", "topic": "Trigonometry", "difficulty": 5, "question": "What is sin(90°)?", "options": ["0", "0.5", "1", "-1"], "correctIndex": 2 },
 
-  { "id": "sci-1a", "subject": "Science", "topic": "Biology", "difficulty": 1, "question": "Which organ pumps blood through the body?", "options": ["Lungs", "Heart", "Liver", "Kidney"], "correctIndex": 1 },
-  { "id": "sci-1b", "subject": "Science", "topic": "Earth Science", "difficulty": 1, "question": "What planet do we live on?", "options": ["Mars", "Venus", "Earth", "Jupiter"], "correctIndex": 2 },
-  { "id": "sci-2a", "subject": "Science", "topic": "Chemistry", "difficulty": 2, "question": "What is the chemical symbol for water?", "options": ["H2O", "O2", "CO2", "NaCl"], "correctIndex": 0 },
-  { "id": "sci-2b", "subject": "Science", "topic": "Biology", "difficulty": 2, "question": "What gas do plants absorb from the air?", "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"], "correctIndex": 2 },
-  { "id": "sci-3a", "subject": "Science", "topic": "Physics", "difficulty": 3, "question": "What force pulls objects toward the Earth?", "options": ["Magnetism", "Gravity", "Friction", "Tension"], "correctIndex": 1 },
-  { "id": "sci-3b", "subject": "Science", "topic": "Chemistry", "difficulty": 3, "question": "What is the atomic number of Carbon?", "options": ["4", "6", "8", "12"], "correctIndex": 1 },
-  { "id": "sci-4a", "subject": "Science", "topic": "Physics", "difficulty": 4, "question": "What is the SI unit of force?", "options": ["Joule", "Watt", "Newton", "Pascal"], "correctIndex": 2 },
-  { "id": "sci-4b", "subject": "Science", "topic": "Biology", "difficulty": 4, "question": "Which organelle is the 'powerhouse of the cell'?", "options": ["Nucleus", "Ribosome", "Mitochondria", "Golgi body"], "correctIndex": 2 },
-  { "id": "sci-5a", "subject": "Science", "topic": "Physics", "difficulty": 5, "question": "What is the formula for kinetic energy?", "options": ["mgh", "1/2 mv^2", "F = ma", "P = IV"], "correctIndex": 1 },
-  { "id": "sci-5b", "subject": "Science", "topic": "Chemistry", "difficulty": 5, "question": "What type of bond involves the sharing of electron pairs?", "options": ["Ionic", "Covalent", "Metallic", "Hydrogen"], "correctIndex": 1 }
+  { "id": "bio-1a", "subject": "Biology", "topic": "Anatomy", "difficulty": 1, "question": "Which organ pumps blood through the body?", "options": ["Lungs", "Heart", "Liver", "Kidney"], "correctIndex": 1 },
+  { "id": "bio-1b", "subject": "Biology", "topic": "Earth Science", "difficulty": 1, "question": "What planet do we live on?", "options": ["Mars", "Venus", "Earth", "Jupiter"], "correctIndex": 2 },
+  { "id": "bio-2b", "subject": "Biology", "topic": "Plant Biology", "difficulty": 2, "question": "What gas do plants absorb from the air?", "options": ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"], "correctIndex": 2 },
+  { "id": "bio-4b", "subject": "Biology", "topic": "Cell Biology", "difficulty": 4, "question": "Which organelle is the 'powerhouse of the cell'?", "options": ["Nucleus", "Ribosome", "Mitochondria", "Golgi body"], "correctIndex": 2 },
+
+  { "id": "chem-2a", "subject": "Chemistry", "topic": "Compounds", "difficulty": 2, "question": "What is the chemical symbol for water?", "options": ["H2O", "O2", "CO2", "NaCl"], "correctIndex": 0 },
+  { "id": "chem-3b", "subject": "Chemistry", "topic": "Atomic Structure", "difficulty": 3, "question": "What is the atomic number of Carbon?", "options": ["4", "6", "8", "12"], "correctIndex": 1 },
+  { "id": "chem-5b", "subject": "Chemistry", "topic": "Bonding", "difficulty": 5, "question": "What type of bond involves the sharing of electron pairs?", "options": ["Ionic", "Covalent", "Metallic", "Hydrogen"], "correctIndex": 1 },
+
+  { "id": "phys-3a", "subject": "Physics", "topic": "Forces", "difficulty": 3, "question": "What force pulls objects toward the Earth?", "options": ["Magnetism", "Gravity", "Friction", "Tension"], "correctIndex": 1 },
+  { "id": "phys-4a", "subject": "Physics", "topic": "Forces", "difficulty": 4, "question": "What is the SI unit of force?", "options": ["Joule", "Watt", "Newton", "Pascal"], "correctIndex": 2 },
+  { "id": "phys-5a", "subject": "Physics", "topic": "Energy", "difficulty": 5, "question": "What is the formula for kinetic energy?", "options": ["mgh", "1/2 mv^2", "F = ma", "P = IV"], "correctIndex": 1 }
 ]

@@ -21,12 +21,12 @@ export function QuestionCard({ question, answering, onAnswer }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-stone-700 bg-stone-950/90 p-4">
-      <p className="text-xs uppercase tracking-wide text-stone-500">
+    <div className="rounded-lg border border-stone-700 bg-stone-950/90 p-3">
+      <p className="text-[11px] uppercase tracking-wide text-stone-500">
         {question.subject} · {question.topic}
       </p>
-      <p className="mt-2 text-lg font-medium text-stone-100">{question.question}</p>
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <p className="mt-1 text-base font-medium text-stone-100">{question.question}</p>
+      <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         {question.options.map((option, index) => {
           const isCorrect = index === question.correctIndex
           const isSelected = index === selected
@@ -42,7 +42,7 @@ export function QuestionCard({ question, answering, onAnswer }: Props) {
               type="button"
               disabled={!answering}
               onClick={() => handleClick(index)}
-              className={`rounded border-2 px-3 py-2 text-left text-stone-100 transition disabled:cursor-not-allowed ${extra}`}
+              className={`rounded border-2 px-2.5 py-1.5 text-left text-sm text-stone-100 transition disabled:cursor-not-allowed ${extra}`}
             >
               {option}
             </button>
@@ -50,7 +50,7 @@ export function QuestionCard({ question, answering, onAnswer }: Props) {
         })}
       </div>
       {!answering && question.explanation && (
-        <p className="mt-3 text-sm italic text-stone-400">{question.explanation}</p>
+        <p className="mt-2 text-xs italic text-stone-400">{question.explanation}</p>
       )}
     </div>
   )

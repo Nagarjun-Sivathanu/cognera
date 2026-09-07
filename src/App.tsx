@@ -4,6 +4,7 @@ import { DungeonMap } from './components/DungeonMap'
 import { HUD } from './components/HUD'
 import { HubScreen } from './components/HubScreen'
 import { RunScreen } from './components/RunScreen'
+import { SubjectSelect } from './components/SubjectSelect'
 import { TitleScreen } from './components/TitleScreen'
 import { useGameStore } from './store/gameStore'
 
@@ -22,7 +23,9 @@ function App() {
   return (
     <div className="min-h-screen bg-stone-900 text-stone-100">
       <HUD onOpenSheet={() => setSheetOpen(true)} />
-      {view === 'list' ? <DungeonMap /> : <RunScreen />}
+      {view === 'subjects' && <SubjectSelect />}
+      {view === 'list' && <DungeonMap />}
+      {view === 'run' && <RunScreen />}
       {sheetOpen && <CharacterSheet onClose={() => setSheetOpen(false)} />}
     </div>
   )
