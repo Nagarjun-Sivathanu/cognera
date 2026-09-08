@@ -1,62 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { playSfx, SFX } from '../game/audio'
+import { summariseMastery } from '../game/mastery'
 import { buildRunReview, type TopicBreakdown } from '../game/review'
+import { useGameStore } from '../store/gameStore'
 import type { RunMistake } from '../types'
+import { MistakeList } from './MistakeList'
+import { StudyNoteCard } from './StudyNoteCard'
 
-const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
-
-function MistakeCard({ mistake }: { mistake: RunMistake }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <div className="rounded border-2 border-amber-950/70 bg-[#1c140c]">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-start gap-2 p-2 text-left hover:bg-black/20"
-      >
-        <span className="mt-0.5 text-xs text-stone-500">{open ? '▾' : '▸'}</span>
-        <span className="flex-1 text-sm text-stone-200">{mistake.question}</span>
-        <span className="shrink-0 rounded bg-stone-800 px-1.5 py-0.5 text-[10px] text-stone-400">
-          D{mistake.difficulty}
-        </span>
-      </button>
-
-      {open && (
-        <div className="space-y-1.5 border-t border-amber-950/70 p-2">
-          {mistake.options.map((option, i) => {
-            const isCorrect = i === mistake.correctIndex
-            const isChosen = i === mistake.chosenIndex
-            return (
-              <div
-                key={i}
-                className={`rounded border px-2 py-1 text-xs ${
-                  isCorrect
-                    ? 'border-emerald-600 bg-emerald-950/40 text-emerald-200'
-                    : isChosen
-                      ? 'border-red-700 bg-red-950/40 text-red-200'
-                      : 'border-stone-800 text-stone-500'
-                }`}
-              >
-                <span className="mr-1.5 font-bold">{OPTION_LETTERS[i] ?? i + 1}.</span>
-                {option}
-                {isCorrect && <span className="ml-2 text-[10px] uppercase tracking-wide">correct</span>}
-                {isChosen && !isCorrect && (
-                  <span className="ml-2 text-[10px] uppercase tracking-wide">you picked this</span>
-                )}
-              </div>
-            )
-          })}
-          {mistake.explanation && (
-            <p className="mt-1 rounded bg-black/30 p-2 text-xs italic leading-relaxed text-stone-300">
-              {mistake.explanation}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
+/** A turnaround counts as "just now" if it was recognised within this run's lifetime. */
+const RECENT_IMPROVEMENT_MS = 30 * 60 * 1000
 
 function TopicSection({ topic, isWeakest }: { topic: TopicBreakdown; isWeakest: boolean }) {
   return (
@@ -74,11 +26,7 @@ function TopicSection({ topic, isWeakest }: { topic: TopicBreakdown; isWeakest: 
           {topic.missed} missed · avg difficulty {topic.averageDifficulty}
         </span>
       </div>
-      <div className="space-y-1.5">
-        {topic.mistakes.map((mistake) => (
-          <MistakeCard key={mistake.questionId} mistake={mistake} />
-        ))}
-      </div>
+      <MistakeList mistakes={topic.mistakes} />
     </section>
   )
 }
@@ -95,6 +43,11 @@ interface Props {
  */
 export function FrogReview({ mistakes, questionsAnswered, onClose }: Props) {
   const review = buildRunReview(mistakes, questionsAnswered)
+  const player = useGameStore((s) => s.player)
+  // Only celebrate turnarounds recognised during this run, not old ones.
+  const justImproved = summariseMastery(player).improvedTopics.filter(
+    (t) => t.improvedAt && Date.now() - t.improvedAt < RECENT_IMPROVEMENT_MS,
+  )
 
   useEffect(() => {
     playSfx(SFX.frogCroak, 0.5)
@@ -136,6 +89,20 @@ export function FrogReview({ mistakes, questionsAnswered, onClose }: Props) {
         </div>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+          {justImproved.length > 0 && (
+            <div className="rounded border-2 border-emerald-700 bg-emerald-950/40 p-3">
+              <p className="font-medieval text-sm text-emerald-300">You've improved — good work</p>
+              <p className="mt-1 text-sm text-stone-300">
+                You used to lose ground on{' '}
+                <span className="font-semibold text-emerald-200">
+                  {justImproved.map((t) => t.topic).join(', ')}
+                </span>
+                . You've been answering {justImproved.length === 1 ? 'it' : 'them'} right consistently now. That's
+                the whole point of this — keep it up.
+              </p>
+            </div>
+          )}
+
           {review.totalMissed === 0 ? (
             <p className="py-8 text-center text-sm text-stone-400">
               Nothing to review — you answered everything correctly.
@@ -152,6 +119,15 @@ export function FrogReview({ mistakes, questionsAnswered, onClose }: Props) {
                     <span className="italic">{review.weakest.topic}</span>, and drill it until it stops biting.
                   </p>
                 </div>
+              )}
+
+              {/* The frog's written note for whatever hurt most this run. */}
+              {review.weakest && (
+                <StudyNoteCard
+                  subject={review.weakest.subject}
+                  topic={review.weakest.topic}
+                  reason="Here's what you actually need to know for this chapter."
+                />
               )}
 
               {review.topics.map((topic) => (

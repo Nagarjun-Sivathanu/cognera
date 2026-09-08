@@ -20,7 +20,15 @@ import {
 } from '../game/combat'
 import { createSandboxDungeon, dungeons, sandboxBudgetForWave } from '../game/dungeonLayout'
 import { generateItem, lootRollsForTier, rollRarity, skillPointsForTier } from '../game/loot'
-import { createNewPlayer, getAttackPower, getLootLuckPercent, getMaxHp, recordAnswer, skills } from '../game/player'
+import {
+  createNewPlayer,
+  getAttackPower,
+  getLootLuckPercent,
+  getMaxHp,
+  logMistake,
+  recordAnswer,
+  skills,
+} from '../game/player'
 import { getQuestionForEnemy } from '../game/questions'
 import { localSaveService } from '../services/saveService'
 import type {
@@ -334,8 +342,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!run || !currentQuestion || run.status !== 'active') return
 
     const correct = selectedIndex === currentQuestion.correctIndex
-    const newPlayer: PlayerState = { ...player, subjectStats: { ...player.subjectStats } }
-    recordAnswer(newPlayer, currentQuestion.subject, correct)
+    const newPlayer: PlayerState = {
+      ...player,
+      subjectStats: { ...player.subjectStats },
+      topicStats: { ...player.topicStats },
+      mistakeLog: [...player.mistakeLog],
+    }
+    recordAnswer(newPlayer, currentQuestion, correct)
 
     const newRun = cloneRun(run)
     newRun.usedQuestionIds = [...newRun.usedQuestionIds, currentQuestion.id]
@@ -377,9 +390,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } else {
       newRun.correctStreak = 0
       // Kept for the post-run review - the frog needs to know what went wrong.
-      newRun.mistakes = [
-        ...newRun.mistakes,
-        {
+      const mistake = {
           questionId: currentQuestion.id,
           subject: currentQuestion.subject,
           topic: currentQuestion.topic,
@@ -388,9 +399,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
           options: currentQuestion.options,
           chosenIndex: selectedIndex,
           correctIndex: currentQuestion.correctIndex,
-          explanation: currentQuestion.explanation,
-        },
-      ]
+        explanation: currentQuestion.explanation,
+      }
+      newRun.mistakes = [...newRun.mistakes, mistake]
+      logMistake(newPlayer, mistake)
       let dmg = rollDamage(enemy.damage)
       if (windUpArmed) dmg = Math.round(dmg * WINDUP_WRONG_MULTIPLIER)
 

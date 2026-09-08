@@ -1,6 +1,7 @@
 import skillsData from '../data/skills.json'
 import { DEFAULT_CHARACTER_ID, getCharacter } from './characters'
-import type { PlayerState, SkillNode, StatKey, Subject } from '../types'
+import { MISTAKE_LOG_CAP, newTopicMastery, recordTopicAnswer, topicKey } from './mastery'
+import type { PlayerState, RunMistake, SkillNode, StatKey, Subject } from '../types'
 
 const skills = skillsData as SkillNode[]
 
@@ -69,15 +70,45 @@ export function createNewPlayer(): PlayerState {
     equipped: {},
     inventory: [],
     subjectStats: {},
+    topicStats: {},
+    mistakeLog: [],
     clearedRuns: 0,
   }
 }
 
-export function recordAnswer(player: PlayerState, subject: Subject, correct: boolean) {
-  const stats = player.subjectStats[subject] ?? { correct: 0, total: 0 }
+/**
+ * Folds one answer into the player's long-term record: per-subject tallies, per-chapter
+ * mastery, and - when the question had been missed before - resolving it in the log.
+ */
+export function recordAnswer(
+  player: PlayerState,
+  question: { subject: Subject; topic: string; id: string },
+  correct: boolean,
+) {
+  const stats = player.subjectStats[question.subject] ?? { correct: 0, total: 0 }
   stats.total += 1
   if (correct) stats.correct += 1
-  player.subjectStats[subject] = stats
+  player.subjectStats[question.subject] = stats
+
+  const key = topicKey(question.subject, question.topic)
+  const mastery = player.topicStats[key] ?? newTopicMastery(question.subject, question.topic)
+  player.topicStats = {
+    ...player.topicStats,
+    [key]: recordTopicAnswer({ ...mastery, recent: [...mastery.recent] }, correct, Date.now()),
+  }
+
+  // Getting a previously-missed question right retires it from the outstanding list.
+  if (correct) {
+    player.mistakeLog = player.mistakeLog.map((m) =>
+      m.questionId === question.id && !m.resolvedAt ? { ...m, resolvedAt: Date.now() } : m,
+    )
+  }
+}
+
+/** Adds a missed question to the persistent log, newest first, replacing any earlier entry. */
+export function logMistake(player: PlayerState, mistake: RunMistake) {
+  const withoutDuplicate = player.mistakeLog.filter((m) => m.questionId !== mistake.questionId)
+  player.mistakeLog = [{ ...mistake, at: Date.now() }, ...withoutDuplicate].slice(0, MISTAKE_LOG_CAP)
 }
 
 export { skills }

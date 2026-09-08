@@ -50,6 +50,8 @@ function migrate(data: SaveData): SaveData {
     unlockedSkills: player.unlockedSkills ?? {},
     unlockedActiveSkills: player.unlockedActiveSkills ?? [],
     subjectStats: player.subjectStats ?? {},
+    topicStats: player.topicStats ?? {},
+    mistakeLog: player.mistakeLog ?? [],
     characterId: player.characterId ?? DEFAULT_CHARACTER_ID,
   }
 

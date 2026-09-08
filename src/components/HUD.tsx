@@ -2,8 +2,15 @@ import { getAttackPower, getLevel, getMaxHp, xpIntoLevel } from '../game/player'
 import { useGameStore } from '../store/gameStore'
 import { PlayerAvatar } from './PlayerAvatar'
 
-export function HUD({ onOpenSheet }: { onOpenSheet: () => void }) {
+export function HUD({
+  onOpenSheet,
+  onOpenStudyDesk,
+}: {
+  onOpenSheet: () => void
+  onOpenStudyDesk: () => void
+}) {
   const player = useGameStore((s) => s.player)
+  const unresolved = (player.mistakeLog ?? []).filter((m) => !m.resolvedAt).length
   const enterHub = useGameStore((s) => s.enterHub)
   const level = getLevel(player.xp)
   const maxHp = getMaxHp(player)
@@ -47,13 +54,35 @@ export function HUD({ onOpenSheet }: { onOpenSheet: () => void }) {
           <p className="text-lg font-bold text-emerald-400">{player.skillPoints}</p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onOpenSheet}
-        className="rounded border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 hover:bg-stone-800"
-      >
-        Character
-      </button>
+      <div className="flex items-center gap-2">
+        {/* The frog's desk: every past mistake and how you're trending. */}
+        <button
+          type="button"
+          onClick={onOpenStudyDesk}
+          title="The Frog Wizard's Desk - past mistakes and progress"
+          className="relative flex items-center gap-2 rounded border border-emerald-800 bg-emerald-950/40 px-3 py-1.5 text-sm text-emerald-200 hover:bg-emerald-900/50"
+        >
+          <img
+            src="/sprites/ui/frog-wizard.png"
+            alt=""
+            className="h-7 w-7"
+            style={{ imageRendering: 'pixelated' }}
+          />
+          Study
+          {unresolved > 0 && (
+            <span className="rounded-full bg-red-900 px-1.5 py-0.5 text-[10px] font-bold text-red-100">
+              {unresolved}
+            </span>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onOpenSheet}
+          className="rounded border border-stone-700 bg-stone-900 px-3 py-2 text-sm text-stone-200 hover:bg-stone-800"
+        >
+          Character
+        </button>
+      </div>
     </div>
   )
 }

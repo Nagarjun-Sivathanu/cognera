@@ -98,6 +98,23 @@ export interface EnemyInstance {
   damage: number
 }
 
+/**
+ * Rolling record of how a player performs on one chapter, used to spot both
+ * persistent weak spots and genuine improvement over time.
+ */
+export interface TopicMastery {
+  subject: Subject
+  topic: string
+  attempts: number
+  correct: number
+  /** Most recent results, newest last. Capped - only the tail matters. */
+  recent: boolean[]
+  /** True once accuracy has been genuinely poor, so improvement can be recognised. */
+  everStruggled: boolean
+  /** Set when a struggling topic has been turned around, so it's only celebrated once. */
+  improvedAt?: number
+}
+
 /** A question answered incorrectly, kept so the run can be reviewed afterwards. */
 export interface RunMistake {
   questionId: string
@@ -109,6 +126,10 @@ export interface RunMistake {
   chosenIndex: number
   correctIndex: number
   explanation?: string
+  /** When it was missed. Present on logged mistakes, absent on in-run ones. */
+  at?: number
+  /** Set once the same question is later answered correctly. */
+  resolvedAt?: number
 }
 
 export interface RunState {
@@ -153,6 +174,10 @@ export interface PlayerState {
   equipped: Partial<Record<ItemSlot, Item>>
   inventory: Item[]
   subjectStats: Record<Subject, { correct: number; total: number }>
+  /** Per-chapter mastery, keyed "Subject::Topic". */
+  topicStats: Record<string, TopicMastery>
+  /** Every question missed, across all runs, newest first and capped. */
+  mistakeLog: RunMistake[]
   clearedRuns: number
 }
 

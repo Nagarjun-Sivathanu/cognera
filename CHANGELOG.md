@@ -2,6 +2,22 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Add written study notes for every chapter
+
+- **Ten hand-written revision notes**, one per real chapter in the question bank (`src/data/studyNotes.ts`). Each covers what the chapter is actually testing, the concepts and formulas needed, and the specific places marks get lost.
+- The **Study Notes tab** now leads with the chapters you're weakest in — annotated with your accuracy and attempt count — followed by the rest to browse.
+- The note for whatever chapter hurt most also appears **inside the post-run review**, so a bad run immediately hands you the material to fix it.
+- These are static content: no API key, no network, no per-request cost, and nothing to fail during a demo. Written to cover the "what concepts will be needed to solve related questions" half of the tutor brief.
+- Still outstanding: **step-by-step solutions for individual questions**. The chapter notes cover method and traps, but no question in the dataset carries a worked solution, and 946 of them can't be hand-written.
+
+## Persist mistakes and track improvement over time
+
+- **Mistakes now persist across runs**, not just within one. Every missed question is logged (capped at 200), and answering the same question correctly later marks it *fixed* rather than deleting it.
+- **Per-chapter mastery tracking**: attempts, correct, and a rolling window of recent results for every chapter you've touched.
+- **Improvement is recognised and celebrated.** A chapter that was genuinely struggling (below 50% over at least 3 attempts) and has since been answered correctly 4 times running gets flagged as turned around — called out both in the post-run review and on the frog's desk. It only fires once per chapter, so it stays meaningful.
+- **The Frog Wizard's Desk**, reachable from the frog icon in the top bar at any time, with a live badge counting unfixed questions. Three tabs: **Progress** (overall accuracy, chapters turned around, chapters needing work, chapters that are solid), **Mistakes** (the full history grouped by chapter, with fixed ones hidden by default), and **Study Notes**.
+- **Known gap — worked solutions and study notes are not generated.** None of the 946 questions in the dataset carry an explanation, so there is no offline source to derive them from. The Study Notes tab and the per-mistake solution slot are both built and wired, and say plainly that they need the AI tutor connected.
+
 ## Add the Frog Wizard's post-run review
 
 - Runs now **record which questions you got wrong** — the question, what you picked, the right answer, the topic and the difficulty. Previously only per-subject correct/total tallies were kept, so there was nothing to review.
