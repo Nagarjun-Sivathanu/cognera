@@ -1,0 +1,2 @@
+K lets use ai to anylaize what topics the students does wrong and have a revie where a ai look at the mistakes and anylaize and makeing study content based on the mistakes to teach them and review n the mistakes that they have made this will be done by our frog agent who will go over the question u did wrong how to do it right and what concepts will be needed to solve related questions and stuff follow the same stylised vision of the game and showed at the end of dugen either at death or at the compleation of the dugen 
+

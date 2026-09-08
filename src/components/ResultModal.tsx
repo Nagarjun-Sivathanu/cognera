@@ -1,13 +1,27 @@
+import { useState } from 'react'
 import { RARITY_TEXT } from '../game/rarity'
 import type { LastRunResult } from '../types'
+import { FrogReview } from './FrogReview'
 import { ItemIcon } from './ItemIcon'
 
 export function ResultModal({ result, onContinue }: { result: LastRunResult; onContinue: () => void }) {
   const sandbox = result.outcome === 'sandbox'
   const cleared = result.outcome === 'cleared'
   const good = cleared || sandbox
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   const title = sandbox ? 'Run Over' : cleared ? 'Dungeon Cleared!' : 'You Fell...'
+  const missed = result.mistakes.length
+
+  if (reviewOpen) {
+    return (
+      <FrogReview
+        mistakes={result.mistakes}
+        questionsAnswered={result.questionsAnswered}
+        onClose={() => setReviewOpen(false)}
+      />
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/75 p-4">
@@ -53,10 +67,32 @@ export function ResultModal({ result, onContinue }: { result: LastRunResult; onC
           )}
         </div>
 
+        {/* The frog only has something to say if you actually got something wrong. */}
+        {missed > 0 && (
+          <button
+            type="button"
+            onClick={() => setReviewOpen(true)}
+            className="mt-5 flex w-full items-center gap-3 rounded border-2 border-emerald-800 bg-emerald-950/40 p-3 text-left transition hover:border-emerald-600 hover:bg-emerald-950/70"
+          >
+            <img
+              src="/sprites/ui/frog-wizard.png"
+              alt=""
+              className="h-12 w-12 shrink-0"
+              style={{ imageRendering: 'pixelated' }}
+            />
+            <span className="min-w-0">
+              <span className="font-medieval block text-sm text-emerald-300">The Frog Wizard has notes</span>
+              <span className="block text-xs text-stone-400">
+                Review the {missed} question{missed === 1 ? '' : 's'} you missed
+              </span>
+            </span>
+          </button>
+        )}
+
         <button
           type="button"
           onClick={onContinue}
-          className="font-medieval mt-6 w-full rounded border-2 border-amber-700 bg-amber-950/80 px-4 py-2 text-amber-200 hover:bg-amber-900/80"
+          className="font-medieval mt-3 w-full rounded border-2 border-amber-700 bg-amber-950/80 px-4 py-2 text-amber-200 hover:bg-amber-900/80"
         >
           {sandbox ? 'Return to Hub' : 'Return to Dungeons'}
         </button>

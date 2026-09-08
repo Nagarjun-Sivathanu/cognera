@@ -9,6 +9,7 @@ export const SFX = {
   mobDoingDamage: '/sounds/mob_doing_dmg.mp3',
   playerDeathblow: '/sounds/player_getting_hit_deathblow.mp3',
   menuClick: '/sounds/menu_click.mp3',
+  frogCroak: '/sounds/frog_croak.mp3',
 } as const
 
 export const BGM = {

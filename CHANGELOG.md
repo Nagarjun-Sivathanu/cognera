@@ -2,6 +2,14 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Add the Frog Wizard's post-run review
+
+- Runs now **record which questions you got wrong** — the question, what you picked, the right answer, the topic and the difficulty. Previously only per-subject correct/total tallies were kept, so there was nothing to review.
+- **The Frog Wizard reviews your run** at the end of a dungeon, on death or on a clear. He opens with a verdict that reacts to how it actually went, then breaks your mistakes down by chapter, worst first, and calls out the one chapter that cost you the most — with a pointer to drill it in chapter revision mode.
+- Each mistake expands to show every option with your pick marked in red, the correct answer in green, and the question's own explanation where it has one.
+- The analysis (`src/game/review.ts`) is deliberately structured rather than prose, so an AI-written review can later slot in behind the same shape without the UI changing. **No API key, no network, no backend** — it works entirely offline, which keeps the offline build fully presentable.
+- Frog portrait downscaled from 616 KB to 68 KB, and his croak plays when he appears.
+
 ## Make characters mechanically distinct, and swappable mid-battle
 
 - **Characters now have their own stats**, so picking one is a real decision rather than a costume change. Knight is heavy (1.15× atk / 1.2× hp), Monk tanks (0.9× / 1.35×), Ranger hits hard but is fragile (1.25× / 0.85×), Hashashin is a glass cannon (1.35× / 0.75×), Adventurer is the 1×/1× baseline. Your level, gear, XP and skills carry across all of them.

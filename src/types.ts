@@ -98,6 +98,19 @@ export interface EnemyInstance {
   damage: number
 }
 
+/** A question answered incorrectly, kept so the run can be reviewed afterwards. */
+export interface RunMistake {
+  questionId: string
+  subject: Subject
+  topic: string
+  difficulty: number
+  question: string
+  options: string[]
+  chosenIndex: number
+  correctIndex: number
+  explanation?: string
+}
+
 export interface RunState {
   // Held by value rather than by id because Sandbox runs use a synthetic dungeon
   // that isn't in the static dungeon list.
@@ -112,6 +125,7 @@ export interface RunState {
   playerHpAtStart: number
   defeatedCount: number
   usedQuestionIds: string[]
+  mistakes: RunMistake[]
   xpAccumulated: number
   status: 'active' | 'cleared' | 'failed'
   enemyStunned: boolean // current enemy's next counter-hit is negated
@@ -149,4 +163,6 @@ export interface LastRunResult {
   xpGained: number
   lootGained: Item[]
   skillPointsGained: number
+  mistakes: RunMistake[]
+  questionsAnswered: number
 }

@@ -56,6 +56,7 @@ Title screen (animated parallax cave)
 - Sound: background music that switches with navigation, and SFX for hits/damage/deathblow/menu clicks.
 - Local save/load of player progress (level, XP, gear, inventory, potions, skill points, learned skills, subject accuracy stats), with migration for saves from the old 3-slot equipment model.
 - Accessibility: text size controls on every screen.
+- **Frog Wizard review** after every run: mistakes grouped by chapter, worst first, with the correct answers and each question's explanation, plus a nudge toward the chapter that needs drilling. Runs fully offline; `src/game/review.ts` returns a structured result so an AI-written review can replace it later without touching the UI.
 
 ## Known gaps / deliberate placeholders
 

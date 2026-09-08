@@ -257,6 +257,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerHpAtStart: maxHp,
       defeatedCount: 0,
       usedQuestionIds: [],
+      mistakes: [],
       xpAccumulated: 0,
       status: 'active',
       enemyStunned: false,
@@ -302,6 +303,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playerHpAtStart: maxHp,
       defeatedCount: 0,
       usedQuestionIds: [],
+      mistakes: [],
       xpAccumulated: 0,
       status: 'active',
       enemyStunned: false,
@@ -374,6 +376,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
       message += tickEffects(newRun, attackPower)
     } else {
       newRun.correctStreak = 0
+      // Kept for the post-run review - the frog needs to know what went wrong.
+      newRun.mistakes = [
+        ...newRun.mistakes,
+        {
+          questionId: currentQuestion.id,
+          subject: currentQuestion.subject,
+          topic: currentQuestion.topic,
+          difficulty: currentQuestion.difficulty,
+          question: currentQuestion.question,
+          options: currentQuestion.options,
+          chosenIndex: selectedIndex,
+          correctIndex: currentQuestion.correctIndex,
+          explanation: currentQuestion.explanation,
+        },
+      ]
       let dmg = rollDamage(enemy.damage)
       if (windUpArmed) dmg = Math.round(dmg * WINDUP_WRONG_MULTIPLIER)
 
@@ -776,6 +793,8 @@ function finalizeRun(get: () => GameStore, set: (partial: Partial<GameStore>) =>
     xpGained,
     lootGained,
     skillPointsGained,
+    mistakes: run.mistakes,
+    questionsAnswered: run.usedQuestionIds.length,
   }
 
   persist(newPlayer)
