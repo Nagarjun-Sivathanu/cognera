@@ -72,6 +72,7 @@ export function createNewPlayer(): PlayerState {
     subjectStats: {},
     topicStats: {},
     mistakeLog: [],
+    solutionCache: {},
     clearedRuns: 0,
   }
 }

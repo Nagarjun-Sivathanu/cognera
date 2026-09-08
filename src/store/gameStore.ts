@@ -30,6 +30,7 @@ import {
   skills,
 } from '../game/player'
 import { getQuestionForEnemy } from '../game/questions'
+import { getSolution, solveOnce } from '../game/solutions'
 import { localSaveService } from '../services/saveService'
 import type {
   DifficultyTier,
@@ -87,6 +88,7 @@ interface GameStore {
   castSkill: (skillId: string) => void
   resolveSkill: () => void
   unlockActiveSkill: (skillId: string) => void
+  cacheSolution: (questionId: string, solution: { keyIdea: string; steps: string[] }) => void
   advance: () => void
   retreat: () => void
   acknowledgeResult: () => void
@@ -403,6 +405,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
       newRun.mistakes = [...newRun.mistakes, mistake]
       logMistake(newPlayer, mistake)
+      // Start solving it right now, so the worked solution is waiting by the time
+      // the run ends. Fire-and-forget: no key configured just means no solution.
+      void solveOnce(mistake, Boolean(getSolution(newPlayer, mistake.questionId)), (id, solution) =>
+        get().cacheSolution(id, solution),
+      )
       let dmg = rollDamage(enemy.damage)
       if (windUpArmed) dmg = Math.round(dmg * WINDUP_WRONG_MULTIPLIER)
 
@@ -663,6 +670,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
       unlockedActiveSkills: [...player.unlockedActiveSkills, skillId],
     }
     playSfx(SFX.menuClick)
+    set({ player: newPlayer })
+    persist(newPlayer)
+  },
+
+  cacheSolution: (questionId, solution) => {
+    const player = get().player
+    if (player.solutionCache[questionId]) return
+    const newPlayer: PlayerState = {
+      ...player,
+      solutionCache: { ...player.solutionCache, [questionId]: solution },
+    }
     set({ player: newPlayer })
     persist(newPlayer)
   },

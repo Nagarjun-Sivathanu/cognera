@@ -2,6 +2,15 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Cache worked solutions per question, solved once and reused
+
+- **Solutions are now cache-first.** Miss a question, and the frog looks for a worked solution: bundled first, then the player's own cache. Anything without one joins a "wanted" list rather than being recomputed — so a given question is only ever solved once, however many times it comes up.
+- Expanding a mistake now shows the **key idea** that unlocks it plus **numbered working**, not just which option was right.
+- **Eleven hand-written worked solutions** shipped (`src/data/solutions.ts`), spanning Circle, Sequence and Series, Definite Integration, Circular Motion, Fluid Mechanics, Chemical Kinetics and Electrochemistry. Each was checked against the dataset's own answer key before being written.
+- **Copy-unsolved export**: one button serialises every outstanding question — id, chapter, difficulty, full options with the correct one marked — so solutions can be written for exactly the questions this player actually missed, and pasted back into the cache. Questions that already have solutions are excluded, so nothing is paid for twice.
+- **The study guide is assembled from accumulated weakness**: the Study Notes tab leads with a summary counting the concepts and traps across every chapter the player is behind on, ordered worst first.
+- `player.solutionCache` persists through the save migration, so solutions survive updates.
+
 ## Add written study notes for every chapter
 
 - **Ten hand-written revision notes**, one per real chapter in the question bank (`src/data/studyNotes.ts`). Each covers what the chapter is actually testing, the concepts and formulas needed, and the specific places marks get lost.

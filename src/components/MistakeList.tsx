@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { getSolution } from '../game/solutions'
+import { useGameStore } from '../store/gameStore'
 import type { RunMistake } from '../types'
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
 
 function MistakeCard({ mistake }: { mistake: RunMistake }) {
   const [open, setOpen] = useState(false)
+  const player = useGameStore((s) => s.player)
+  const solution = getSolution(player, mistake.questionId)
 
   return (
     <div className={`rounded border-2 bg-[#1c140c] ${mistake.resolvedAt ? 'border-emerald-900/70' : 'border-amber-950/70'}`}>
@@ -51,16 +55,24 @@ function MistakeCard({ mistake }: { mistake: RunMistake }) {
             )
           })}
 
-          {mistake.explanation ? (
-            <p className="mt-1 rounded bg-black/30 p-2 text-xs italic leading-relaxed text-stone-300">
-              {mistake.explanation}
-            </p>
+          {solution ? (
+            <div className="mt-1 rounded border border-emerald-900/70 bg-emerald-950/20 p-2">
+              <p className="text-[10px] uppercase tracking-wide text-emerald-400">Key idea</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-emerald-100">{solution.keyIdea}</p>
+              <p className="mt-2 text-[10px] uppercase tracking-wide text-amber-300">Working</p>
+              <ol className="mt-1 space-y-1">
+                {solution.steps.map((step, i) => (
+                  <li key={i} className="flex gap-2 text-xs leading-relaxed text-stone-200">
+                    <span className="shrink-0 text-stone-500">{i + 1}.</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           ) : (
-            // The dataset ships no per-question explanations; the chapter note in the
-            // Study Notes tab covers the method, and this is where a generated
-            // step-by-step solution would land.
+            // Not solved yet - it's on the wanted list until something writes one.
             <p className="mt-1 rounded border border-dashed border-stone-700 bg-black/20 p-2 text-[11px] text-stone-500">
-              No step-by-step solution for this specific question — see the {mistake.topic} note under Study Notes for
+              No worked solution yet — this one is queued. Meanwhile, the {mistake.topic} note under Study Notes covers
               the method and the usual traps.
             </p>
           )}

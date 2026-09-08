@@ -178,6 +178,8 @@ export interface PlayerState {
   topicStats: Record<string, TopicMastery>
   /** Every question missed, across all runs, newest first and capped. */
   mistakeLog: RunMistake[]
+  /** Worked solutions produced for this player, keyed by question id. Written once, reused forever. */
+  solutionCache: Record<string, { keyIdea: string; steps: string[] }>
   clearedRuns: number
 }
 

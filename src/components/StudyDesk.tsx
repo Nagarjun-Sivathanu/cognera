@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { getStudyNote, studyNotes } from '../data/studyNotes'
 import { playSfx, SFX } from '../game/audio'
 import { groupMistakesByTopic, summariseMastery, topicAccuracy } from '../game/mastery'
+import { exportWantedSolutions, solveOnce, wantedSolutions } from '../game/solutions'
 import { useGameStore } from '../store/gameStore'
 import type { RunMistake, TopicMastery } from '../types'
 import { MistakeList } from './MistakeList'
@@ -96,7 +97,11 @@ function Overview() {
 
 function Mistakes() {
   const player = useGameStore((s) => s.player)
+  const cacheSolution = useGameStore((s) => s.cacheSolution)
   const [showResolved, setShowResolved] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [solving, setSolving] = useState(false)
+  const wanted = wantedSolutions(player)
 
   const log: RunMistake[] = player.mistakeLog ?? []
   const visible = showResolved ? log : log.filter((m) => !m.resolvedAt)
@@ -109,16 +114,54 @@ function Mistakes() {
         <p className="text-xs text-stone-400">
           {visible.length} question{visible.length === 1 ? '' : 's'} shown
           {resolvedCount > 0 && ` · ${resolvedCount} since fixed`}
+          {wanted.length > 0 && ` · ${wanted.length} awaiting a worked solution`}
         </p>
-        {resolvedCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowResolved((v) => !v)}
-            className="rounded border border-stone-700 px-2 py-1 text-[11px] text-stone-300 hover:bg-stone-800"
-          >
-            {showResolved ? 'Hide fixed' : 'Show fixed'}
-          </button>
-        )}
+        <div className="flex shrink-0 gap-2">
+          {wanted.length > 0 && (
+            <button
+              type="button"
+              disabled={solving}
+              onClick={async () => {
+                setSolving(true)
+                // Sequential rather than parallel: free tiers rate-limit bursts.
+                for (const mistake of wanted) {
+                  await solveOnce(mistake, false, cacheSolution)
+                }
+                setSolving(false)
+              }}
+              className="rounded border border-amber-700 px-2 py-1 text-[11px] text-amber-200 hover:bg-amber-950/60 disabled:opacity-50"
+            >
+              {solving ? 'Solving…' : `Solve ${wanted.length}`}
+            </button>
+          )}
+          {wanted.length > 0 && (
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(exportWantedSolutions(player))
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                } catch {
+                  // clipboard can be blocked; nothing to recover, the button just won't confirm
+                }
+              }}
+              title="Copy the unsolved questions so worked solutions can be written for them"
+              className="rounded border border-emerald-800 px-2 py-1 text-[11px] text-emerald-300 hover:bg-emerald-950/60"
+            >
+              {copied ? 'Copied' : `Copy ${wanted.length} unsolved`}
+            </button>
+          )}
+          {resolvedCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowResolved((v) => !v)}
+              className="rounded border border-stone-700 px-2 py-1 text-[11px] text-stone-300 hover:bg-stone-800"
+            >
+              {showResolved ? 'Hide fixed' : 'Show fixed'}
+            </button>
+          )}
+        </div>
       </div>
 
       {groups.length === 0 ? (
@@ -158,6 +201,19 @@ function Notes() {
 
   return (
     <div className="space-y-4">
+      {priority.length > 0 && (
+        <div className="rounded border-2 border-amber-700/60 bg-amber-950/30 p-3">
+          <p className="font-medieval text-sm text-amber-200">Your study guide</p>
+          <p className="mt-1 text-xs leading-relaxed text-stone-300">
+            Built from every chapter you're behind on:{' '}
+            <span className="text-amber-100">{priority.map((t) => t.topic).join(', ')}</span>. That's{' '}
+            {priority.reduce((n, t) => n + (getStudyNote(t.subject, t.topic)?.concepts.length ?? 0), 0)} concepts and{' '}
+            {priority.reduce((n, t) => n + (getStudyNote(t.subject, t.topic)?.traps.length ?? 0), 0)} common traps to
+            work through, ordered worst first.
+          </p>
+        </div>
+      )}
+
       {priority.length > 0 && (
         <section className="space-y-3">
           <div>

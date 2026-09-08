@@ -52,6 +52,7 @@ function migrate(data: SaveData): SaveData {
     subjectStats: player.subjectStats ?? {},
     topicStats: player.topicStats ?? {},
     mistakeLog: player.mistakeLog ?? [],
+    solutionCache: player.solutionCache ?? {},
     characterId: player.characterId ?? DEFAULT_CHARACTER_ID,
   }
 
