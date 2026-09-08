@@ -1,5 +1,5 @@
 import skillsData from '../data/skills.json'
-import { DEFAULT_CHARACTER_ID } from './characters'
+import { DEFAULT_CHARACTER_ID, getCharacter } from './characters'
 import type { PlayerState, SkillNode, StatKey, Subject } from '../types'
 
 const skills = skillsData as SkillNode[]
@@ -34,14 +34,18 @@ function gearBonus(player: PlayerState, stat: StatKey): number {
   return total
 }
 
+// Each character scales the final numbers, so switching bodies is a real trade-off
+// rather than a costume change. Applied last, on top of level/skill/gear bonuses.
 export function getAttackPower(player: PlayerState): number {
   const level = getLevel(player.xp)
-  return player.baseAttack + level + skillBonus(player, 'attack') + gearBonus(player, 'attack')
+  const base = player.baseAttack + level + skillBonus(player, 'attack') + gearBonus(player, 'attack')
+  return Math.max(1, Math.round(base * getCharacter(player.characterId).stats.attack))
 }
 
 export function getMaxHp(player: PlayerState): number {
   const level = getLevel(player.xp)
-  return player.baseMaxHp + level * 5 + skillBonus(player, 'hp') + gearBonus(player, 'hp')
+  const base = player.baseMaxHp + level * 5 + skillBonus(player, 'hp') + gearBonus(player, 'hp')
+  return Math.max(1, Math.round(base * getCharacter(player.characterId).stats.hp))
 }
 
 export function getLootLuckPercent(player: PlayerState): number {

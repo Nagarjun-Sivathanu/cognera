@@ -45,11 +45,11 @@ Title screen (animated parallax cave)
 
 - Full navigation flow above, verified end to end.
 - Turn-based combat where damage scales with player attack power (gear/level/skills), so a leveled-up player can one-shot weak enemies.
-- Battle actions: Attack (default), Bag (heal), Stagger (stun chance), Dodge (evasion chance), Wind Up (risk/reward damage modifier), Flame Arts (active skills), Retreat.
+- Battle actions: Attack (default), Bag (heal), Swap (change character, 3-turn cooldown), Dodge (evasion, with a stun chance), Wind Up (risk/reward damage modifier), the character's skill school, Retreat.
 - **Focus**: a bar that fills only from correct answers — faster the longer your streak — and is spent casting skills. It's the mechanical link between answering well and combat power.
 - **Per-character skill schools**: each of the five characters has its own 3–4 skills, animated with its own art (Emberblade, Stone Path, Wild Hunt, Windcraft, Flame Arts). Damage lands part-way through the cast animation, when the swing connects — not on the button press.
 - **Equipment**: 7 slots, 6 of them visible on the Adventurer's sprite, with rarity tinting and real item icons.
-- **Five playable characters**, swappable at any time from the character sheet's Hero tab, each animating per battle action (attack / take-hit / block / special / death).
+- **Five playable characters** with their own stat profiles (attack/HP multipliers), true relative sizes, skill schools and animations. Swappable from the character sheet, or mid-battle on a cooldown. The Ranger fires a real projectile that crosses to the enemy.
 - Randomized loot (5 rarities, tier-weighted odds), a passive skill tree, and 4 unlockable active skills.
 - Real question content: ~912 usable converted JEE-style Math/Physics/Chemistry questions plus Biology placeholders, filterable by chapter.
 - **Sandbox**: endless escalating waves with rewards scaled to depth.

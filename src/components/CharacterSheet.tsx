@@ -120,7 +120,8 @@ function HeroTab() {
     <Panel className="p-3">
       <p className="font-medieval mb-1 text-sm text-amber-300">Choose your fighter</p>
       <p className="mb-3 text-[11px] text-stone-500">
-        Purely cosmetic — your stats, gear and skills come with you. Hover a character to see it move.
+        Each body scales your attack and HP differently and brings its own skills — your level, gear and XP come with
+        you. You can also swap mid-battle, on a cooldown. Hover a character to see it move.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {characters.map((character) => {
@@ -132,13 +133,23 @@ function HeroTab() {
                 selected ? 'border-amber-500 bg-amber-950/40' : 'border-amber-950/70 bg-[#1c140c]'
               }`}
             >
+              {/* Previewed at their true relative sizes, matching how they fight. */}
               <div className="flex h-[150px] items-end justify-center overflow-hidden rounded bg-black/30">
-                <CharacterPreview characterId={character.id} height={118} />
+                <CharacterPreview characterId={character.id} height={Math.round(character.displayHeight * 0.72)} />
               </div>
               <p className="font-medieval mt-2 text-center text-sm text-stone-100">{character.name}</p>
               <p className="mt-0.5 h-8 text-center text-[11px] leading-tight text-stone-500">{character.blurb}</p>
+              <div className="mt-1 flex justify-center gap-2 text-[11px]">
+                <span className={character.stats.attack >= 1 ? 'text-orange-400' : 'text-stone-500'}>
+                  {character.stats.attack}× atk
+                </span>
+                <span className={character.stats.hp >= 1 ? 'text-emerald-400' : 'text-stone-500'}>
+                  {character.stats.hp}× hp
+                </span>
+              </div>
+              <p className="mt-0.5 h-7 text-center text-[10px] leading-tight text-stone-500">{character.stats.role}</p>
               <p className="mt-1 text-center text-[10px] uppercase tracking-wide text-stone-600">
-                {character.wearsEquipment ? 'Shows your armour' : 'Own outfit'}
+                {character.skillSchool} · {character.wearsEquipment ? 'shows armour' : 'own outfit'}
               </p>
               <button
                 type="button"

@@ -2,6 +2,14 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Make characters mechanically distinct, and swappable mid-battle
+
+- **Characters now have their own stats**, so picking one is a real decision rather than a costume change. Knight is heavy (1.15× atk / 1.2× hp), Monk tanks (0.9× / 1.35×), Ranger hits hard but is fragile (1.25× / 0.85×), Hashashin is a glass cannon (1.35× / 0.75×), Adventurer is the 1×/1× baseline. Your level, gear, XP and skills carry across all of them.
+- **Characters are now sized to their true proportions** — one shared zoom across the Elementals cast, so the Knight genuinely towers over the Monk instead of every character being hand-tuned to the same height. The picker previews them at the same relative sizes they fight at.
+- **Stagger is replaced by Swap**, which changes which body you're fighting in mid-battle. It costs the turn and goes on a 3-turn cooldown, and your current HP is clamped to the new body's maximum — so swapping to a frailer character while hurt is a real risk, not a free heal. Stagger's stun wasn't lost: a successful Dodge now has a 35% chance to leave the enemy off-balance.
+- **The Leaf Ranger actually shoots.** Her arrow now leaves the bow and crosses the battlefield to the enemy, with a real impact effect on landing, using the pack's standalone projectile art.
+- Fixed max HP being exceeded on load — a save made as a tankier character could show 400/383 after switching to a frailer one.
+
 ## Give every character its own skills, and land skill damage on impact
 
 - **Fixed: skills applied damage before the animation played.** The numbers moved the instant you cast, then an animation played over an already-resolved turn, so the effect looked cosmetic. Casting is now two-phase — the animation starts and the focus is spent, and the hit lands part-way through the swing, when it visually connects. Each skill declares how far through its animation that happens.

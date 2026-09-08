@@ -21,6 +21,16 @@ body {
   image-rendering: pixelated;
 }
 
+/* Carries a ranged character's shot from the player across to the enemy. */
+@keyframes arrow-flight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(68vw);
+  }
+}
+
 @keyframes drift-slow {
   0% {
     transform: scale(1.15) translateX(-2.5%);
