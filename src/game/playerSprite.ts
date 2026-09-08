@@ -25,7 +25,7 @@ const LAYER_ORDER = ['leggings', 'boots', 'chestplate', 'gloves', 'hair', 'hat',
  */
 export function equipmentLayers(
   equipped: Partial<Record<ItemSlot, Item>>,
-  anim: 'idle' | 'attack',
+  anim: 'idle' | 'attack' | 'move',
 ): SpriteLayer[] {
   const byPart = new Map<string, SpriteLayer>()
 

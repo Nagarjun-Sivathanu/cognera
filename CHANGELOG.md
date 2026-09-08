@@ -2,6 +2,59 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Add Definite Integration, with the Shape Builder simulation
+
+- **A second Learn Content chapter**, and the first taught by the town regulars: Elder Mabon builds the definite integral from first principles as the limit of a Riemann sum, Isolde re-explains the Fundamental Theorem in plain terms, Silas hands over the properties with the reason each one works, and Corwin says where the marks actually go. Brannoc and Perrin stand by to take questions.
+- **The Shape Builder**: type a function, set the other boundary, drag the limits, and the region between them is filled in and measured live. The demo types out `x^2` a character at a time on first open, so the first thing you see is a curve being drawn rather than a blank grid.
+- **A real parser, not `eval`.** A tokeniser and recursive-descent parser compile the typed text to a closure, so bad input comes back as a readable message pointing at the offending character instead of an exception. Implicit multiplication (`2x`, `3sin(x)`, `x(x+1)`) works as written, because students write it that way.
+- **Both numbers are shown, always, and coloured apart.** The signed integral and the area of the shape sit side by side, the region is filled lobe by lobe with the negative parts in red, and a warning fires when the curve crosses its boundary inside the limits — the single distinction that costs the most marks in this chapter.
+- **Riemann strips on a slider**, so Elder Mabon's "sum that never stops" can be watched converging on the answer.
+- Four targets that check the actual geometry: hit an area of exactly 50, make the integral vanish while the shape stays large, drive the integral negative, and find the largest area that fits under a height cap.
+- **`npm run check:calculus`** — 48 checks over parsing, operator precedence, clean failure, and numeric integration against integrals whose exact values are known.
+
+## Give the characters a body: running, jumping and rolling
+
+- All four Elementals packs ship `run`, `jump_up`, `jump_down` and `roll` art that was never being used. It is now built into the sprite strips and wired up, and the original hero's `Move` sheet is in with its equipment layers.
+- In the atrium the player **runs** rather than playing a sped-up idle, **jumps** on Space with a real gravity arc that swaps between the rising and falling sheets, and **rolls** on Shift — a committed dash that carries you the way you were facing.
+- The jump fires on the key press rather than being read from the held-key set, so a quick tap between two frames still jumps.
+- Animation resolution now knows which animations loop. Previously anything that was not `idle` was treated as a one-shot, which would have frozen a run on its last frame.
+
+## Put the newer NPCs first, and give the hall room
+
+- The town pack looks better than the older set, so the townsfolk now lead each pairing — you meet someone who will answer anything before you meet the one who lectures — and they are no longer dimmed into the background.
+- The hall is now built long enough to hold everyone at a fixed spacing rather than squeezing them into a fixed length. With eight stations they were 212px apart against a 110px interaction range, which made people easy to run straight past.
+- A mis-sliced eighth frame in the researcher strips flashed a cropped fragment once per animation cycle. The slicer now drops frames far shorter than the row's median.
+
+## Build the Molecule Builder simulation for General Organic Chemistry I
+
+- **The frog's hand-off now opens a real bench.** Place atoms from a palette of C, H, O, N and the halogens, join them with single, double or triple bonds, and the bench reads the structure back: molecular formula, IUPAC name where one can be given honestly, and `Functional group detected: …` with a one-line reason in the researchers' own words.
+- **Valency is enforced, not merely displayed.** Every atom shows how many bond slots it has left, and a bond that would overspend one is refused by name — "C takes 4 bonds — no room for that one." A structure only counts as valid once every atom is satisfied and nothing is left as a separate fragment.
+- **Thirteen functional groups are recognised** by graph pattern, in IUPAC seniority order, so a carbonyl carrying an O–H reads as a carboxylic acid rather than as an aldehyde plus an alcohol.
+- **Naming is deliberately conservative.** Unbranched, acyclic, single-group molecules get a name with the correct locant; anything else gets none rather than a wrong one.
+- **Nine reagents, and they transform the graph for real** — the oxidation ladder (K₂Cr₂O₇ one rung at a time, KMnO₄ all the way), reduction (NaBH₄, and LiAlH₄ for the acids NaBH₄ won't touch), H₂/Pd, HBr with Markovnikov applied from the actual hydrogen counts, aqueous versus alcoholic KOH, and dehydration.
+- **Refusals teach.** A reagent with nothing to act on says what it was looking for — a tertiary alcohol is turned away because its carbinol carbon has no hydrogen left to strip, and a ketone because it is already at the top of its ladder.
+- **Reactant → Reagent → Product** is drawn as a strip under the bench: the structure before, the reagent, the structure after, and what actually moved.
+- Eight build targets clear themselves however they are reached, so oxidising ethanol twice ticks off the aldehyde and the acid on the way through. Loading a preset deliberately does not count.
+- **`npm run check:chemistry` verifies the chemistry end to end** — 30 checks covering structure, naming, valency refusal, and every reagent against the product a textbook says it should give. The simulation teaches chemistry, so being wrong is worse than being missing.
+
+## Add four townsfolk who take questions but teach no lesson
+
+- The GothicVania town pack is wired in as **four optional tutors** standing between the researchers: Corwin the examiner, Silas the mnemonist, Elder Mabon who refuses shortcuts, and Isolde who explains it a second way. They gate nothing and have no script — talking to one opens straight into free-form chat, for a player who did not follow a researcher's explanation.
+- NPCs now carry their own display height, because the two asset packs differ by a factor of four in source resolution.
+- The frog sat far enough from the right-hand wall that walking to the end of the atrium overshot him and put him out of interaction range. Moved him in.
+
+## Add Learn Content: a walkable concept atrium with talking NPCs
+
+- **Fixed the AI tutor, which was never working.** `.env.local` had `GROQ_API_KEY = gsk_...` with a space before the `=`; dotenv rejects that, so the key was silently never loaded. Also switched the default model — `llama-3.3-70b-versatile` isn't served on this account, `openai/gpt-oss-120b` is. Verified live end to end.
+- **Fixed the tour hanging in battle.** The "answer the question" step had no way to clear: it waited for a screen change that never came, because answering keeps you on the same screen. Steps can now name an in-view state change to advance on.
+- **Chapters now offer Learn Content or Quiz Dungeon.** Learn Content is disabled for chapters with no lesson written yet, rather than leading somewhere empty.
+- **The Atrium of Bonds**: a side-scrolling, parallax sci-fi hall you walk with A/D or the arrow keys, with four researchers stationed along it and the frog waiting at the far end. Runs on `combat_music_1`.
+- **Talking to a researcher splits the screen**: them on the left, their lesson on the right, delivered beat by beat. Once the scripted lesson finishes the panel becomes a **live chat** — the player can ask anything and the NPC answers in character, with their voice and the concept context pinned into the system prompt.
+- Four distinct voices: Brannoc the blunt Bondsmith, Fenwick the theatrical Bard of Groups, Old Hask who tracks electrons like game, and Perrin the brisk Reagent Keeper.
+- **General Organic Chemistry I** is written first, deliberately teaching exactly the vocabulary its simulation will need: valency, functional groups, electronic effects, and reagent transformations.
+- `scripts/build_npcs.py` keys the grey backdrop out of the source sheets, drops the label column, and keeps only each frame's largest pixel island — the row bands carry a sliver of the next band's label text that survives colour keying.
+- The frog gates the simulation until every researcher has been heard.
+
 ## Replace the tutorial screen with a first-run guided tour
 
 - The tutorial is no longer a hub mode. It now **starts by itself for a new player** — no save on disk — the moment they enter the hub, and never shows again once seen or skipped. Existing saves are migrated as already-completed.

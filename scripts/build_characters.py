@@ -32,6 +32,10 @@ CHARACTERS = {
         "dir": os.path.join("Elementals_fire_knight_FREE_v1.1", "png", "fire_knight"),
         "anims": {
             "idle": "01_idle",
+            "run": "02_run",
+            "jumpUp": "03_jump_up",
+            "jumpDown": "03_jump_down",
+            "roll": "04_roll",
             "attack": "05_1_atk",
             "attack2": "06_2_atk",
             "attack3": "07_3_atk",
@@ -45,6 +49,10 @@ CHARACTERS = {
         "dir": os.path.join("Elementals_ground_monk_FREE_v1.3", "png"),
         "anims": {
             "idle": "idle",
+            "run": "run",
+            "jumpUp": "j_up",
+            "jumpDown": "j_down",
+            "roll": "roll",
             "attack": "1_atk",
             "attack2": "2_atk",
             "attack3": "3_atk",
@@ -59,6 +67,10 @@ CHARACTERS = {
         "dir": os.path.join("Elementals_Leaf_ranger_Free_v1.0", "animations", "PNG"),
         "anims": {
             "idle": "idle",
+            "run": "run",
+            "jumpUp": "jump_up",
+            "jumpDown": "jump_down",
+            "roll": "roll",
             "attack": "1_atk",
             "attack2": "2_atk",
             "attack3": "3_atk",
@@ -72,6 +84,10 @@ CHARACTERS = {
         "dir": os.path.join("elementals_wind_hashashin_FREE_v1.1", "PNG"),
         "anims": {
             "idle": "idle",
+            "run": "run",
+            "jumpUp": "j_up",
+            "jumpDown": "j_down",
+            "roll": "roll",
             "attack": "1_atk",
             "attack2": "2_atk",
             "attack3": "3_atk",

@@ -6,6 +6,7 @@ import { FontSizeControl } from './components/FontSizeControl'
 import { GuidedTour } from './components/GuidedTour'
 import { HUD } from './components/HUD'
 import { HubScreen } from './components/HubScreen'
+import { LearnScreen } from './components/LearnScreen'
 import { RunScreen } from './components/RunScreen'
 import { SandboxSelect } from './components/SandboxSelect'
 import { StudyDesk } from './components/StudyDesk'
@@ -44,6 +45,7 @@ function App() {
       {view === 'chapters' && <ChapterSelect />}
       {view === 'list' && <DungeonMap />}
       {view === 'sandbox' && <SandboxSelect />}
+      {view === 'learn' && <LearnScreen />}
       {view === 'run' && <RunScreen />}
       {sheetOpen && <CharacterSheet onClose={() => setSheetOpen(false)} />}
       {studyDeskOpen && <StudyDesk onClose={() => setStudyDeskOpen(false)} />}

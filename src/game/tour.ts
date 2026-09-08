@@ -8,7 +8,7 @@ import type { FrogEmotion } from './tutorial'
  * the game moves them on - the tour follows rather than getting stranded.
  */
 
-export type TourView = 'hub' | 'subjects' | 'chapters' | 'list' | 'run'
+export type TourView = 'hub' | 'subjects' | 'chapters' | 'learn' | 'list' | 'run'
 
 export interface TourStep {
   id: string
@@ -22,6 +22,12 @@ export interface TourStep {
    * The tour moves on by itself once they land on the next screen.
    */
   waitForAction?: string
+  /**
+   * For actions that don't change screen (answering a question), name the state
+   * change that should advance the tour. Without this a waitForAction step on the
+   * same view would never clear.
+   */
+  advanceOn?: 'answered'
 }
 
 export const tourSteps: TourStep[] = [
@@ -60,12 +66,42 @@ export const tourSteps: TourStep[] = [
     text: 'Total Revision mixes every chapter in the subject together. Good for a general beating.',
   },
   {
+    id: 'chapters-learn',
+    view: 'chapters',
+    target: 'learn-content',
+    emotion: 'proud',
+    text: "And THIS one, buddy — Learn Content. Where a chapter has it, you can go and be taught the thing before it's used to hit you. Walk a hall, talk to the people who know it, then build it yourself. Novel idea, learning before the exam.",
+  },
+  {
     id: 'chapters-single',
     view: 'chapters',
     target: 'chapter-list',
     emotion: 'proud',
     text: "Or drill ONE chapter on its own. That's the option that actually fixes a weakness, buddy — when I tell you later that a chapter keeps killing you, this is where you come. Pick something.",
     waitForAction: 'Pick a chapter to continue',
+  },
+
+  // --- Learn Content. Only reached if the player actually opened it; if they went
+  // straight to the dungeon the tour skips these and picks up at the tier map.
+  {
+    id: 'learn-walk',
+    view: 'learn',
+    target: 'learn-controls',
+    emotion: 'neutral',
+    text: "Right — you're in the Atrium of Bonds. Walk it with A and D, and press E when someone's standing in front of you. That's the whole control scheme. Try not to strain yourself.",
+  },
+  {
+    id: 'learn-progress',
+    view: 'learn',
+    target: 'learn-progress',
+    emotion: 'proud',
+    text: "The researchers each hold one piece of the chapter, and I count them here. Hear all of them and I'll open the simulation. The townsfolk between them teach nothing — they just take questions, for when one of the clever ones explains it badly.",
+  },
+  {
+    id: 'learn-frog',
+    view: 'learn',
+    emotion: 'excited',
+    text: "and i'm waiting at the FAR END with the good part. build a molecule, atom by atom, and i'll tell you what you've made — then throw reagents at it and watch it turn into something else. go on. i've been standing here for ages.",
   },
 
   // --- Tier map
@@ -128,6 +164,7 @@ export const tourSteps: TourStep[] = [
     emotion: 'happy',
     text: "Right — answer it. Whatever happens, happens. I'll be watching, and I'm keeping notes.",
     waitForAction: 'Answer the question to continue',
+    advanceOn: 'answered',
   },
   {
     id: 'desk',

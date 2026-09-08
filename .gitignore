@@ -37,3 +37,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Raw parallax scenery source - the served layers live under public/sprites/backgrounds.
+/sci fi scenery/

@@ -18,7 +18,7 @@ import {
   WINDUP_WRONG_MULTIPLIER,
   xpForEnemy,
 } from '../game/combat'
-import { createSandboxDungeon, dungeons, sandboxBudgetForWave } from '../game/dungeonLayout'
+import { createSandboxDungeon, dungeons, sandboxBudgetForWave, SUBJECTS } from '../game/dungeonLayout'
 import { generateItem, lootRollsForTier, rollRarity, skillPointsForTier } from '../game/loot'
 import {
   createNewPlayer,
@@ -61,7 +61,7 @@ interface GameStore {
   currentQuestion: Question | null
   feedback: Feedback | null
   lastResult: LastRunResult | null
-  view: 'title' | 'hub' | 'subjects' | 'chapters' | 'list' | 'sandbox' | 'run'
+  view: 'title' | 'hub' | 'subjects' | 'chapters' | 'list' | 'sandbox' | 'learn' | 'run'
   phase: Phase
   windUpArmed: boolean
   selectedSubjectId: string | null
@@ -78,6 +78,9 @@ interface GameStore {
   endTour: () => void
   selectSubject: (subjectId: string) => void
   selectChapter: (chapter: string | null) => void
+  enterLearn: (chapter: string) => void
+  /** Subject name for the current selection, for content lookups. */
+  selectedSubjectName: string
   backToSubjects: () => void
   backToChapters: () => void
   setPlayerName: (name: string) => void
@@ -197,6 +200,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   windUpArmed: false,
   selectedSubjectId: null,
   selectedChapter: null,
+  selectedSubjectName: '',
   vfx: null,
   pendingSkill: null,
   // A brand new player (no save on disk) gets walked through the game once.
@@ -226,7 +230,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectSubject: (subjectId) => {
     playSfx(SFX.menuClick)
     playBgm(BGM.menu)
-    set({ selectedSubjectId: subjectId, selectedChapter: null, view: 'chapters' })
+    const template = SUBJECTS.find((s) => s.id === subjectId)
+    set({
+      selectedSubjectId: subjectId,
+      selectedSubjectName: template?.subject ?? '',
+      selectedChapter: null,
+      view: 'chapters',
+    })
+  },
+  enterLearn: (chapter) => {
+    playSfx(SFX.menuClick)
+    set({ selectedChapter: chapter, view: 'learn' })
   },
   selectChapter: (chapter) => {
     playSfx(SFX.menuClick)

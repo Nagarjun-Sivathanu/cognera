@@ -1,10 +1,12 @@
 import { SUBJECTS } from '../game/dungeonLayout'
+import { getChapterConcept } from '../data/concepts'
 import { chaptersForSubject, questionCount } from '../game/questions'
 import { useGameStore } from '../store/gameStore'
 
 export function ChapterSelect() {
   const selectedSubjectId = useGameStore((s) => s.selectedSubjectId)
   const selectChapter = useGameStore((s) => s.selectChapter)
+  const enterLearn = useGameStore((s) => s.enterLearn)
   const backToSubjects = useGameStore((s) => s.backToSubjects)
 
   const subject = SUBJECTS.find((s) => s.id === selectedSubjectId)
@@ -51,21 +53,43 @@ export function ChapterSelect() {
 
         <p className="font-medieval mt-6 text-sm uppercase tracking-wide text-stone-400">Chapter revision</p>
         <div data-tour="chapter-list" className="mt-2 grid gap-3 sm:grid-cols-2">
-          {chapters.map((chapter) => (
-            <button
-              key={chapter}
-              type="button"
-              onClick={() => selectChapter(chapter)}
-              className="rounded-lg border-2 border-stone-700 bg-stone-950/80 p-4 text-left shadow-lg transition hover:border-amber-700 hover:brightness-125"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medieval text-lg text-stone-100">{chapter}</p>
-                <span className="shrink-0 text-xs text-stone-500">
-                  {questionCount(subject.subject, chapter)} q
-                </span>
+          {chapters.map((chapter) => {
+            const hasLesson = Boolean(getChapterConcept(subject.subject, chapter))
+            return (
+              <div
+                key={chapter}
+                className="rounded-lg border-2 border-stone-700 bg-stone-950/80 p-4 shadow-lg transition hover:border-amber-700"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medieval text-lg text-stone-100">{chapter}</p>
+                  <span className="shrink-0 text-xs text-stone-500">
+                    {questionCount(subject.subject, chapter)} q
+                  </span>
+                </div>
+                {/* Learn the concepts first, or go straight to being hit by them. */}
+                <div className="mt-3 flex gap-2">
+                  <button
+                    type="button"
+                    // The tour spotlights the first chapter that actually has a lesson.
+                    data-tour={hasLesson ? 'learn-content' : undefined}
+                    disabled={!hasLesson}
+                    onClick={() => enterLearn(chapter)}
+                    title={hasLesson ? 'Walk the atrium and learn the concepts' : 'No lesson written for this chapter yet'}
+                    className="flex-1 rounded border-2 border-cyan-800 bg-cyan-950/50 px-2 py-1.5 text-xs text-cyan-200 hover:bg-cyan-900/60 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    Learn Content
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => selectChapter(chapter)}
+                    className="flex-1 rounded border-2 border-amber-800 bg-amber-950/60 px-2 py-1.5 text-xs text-amber-200 hover:bg-amber-900/60"
+                  >
+                    Quiz Dungeon
+                  </button>
+                </div>
               </div>
-            </button>
-          ))}
+            )
+          })}
           {chapters.length === 0 && (
             <p className="text-sm text-stone-500">No questions loaded for this subject yet.</p>
           )}

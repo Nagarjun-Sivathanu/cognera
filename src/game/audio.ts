@@ -15,6 +15,7 @@ export const SFX = {
 export const BGM = {
   cave: '/sounds/cave_0.mp3',
   menu: '/sounds/menu_song.mp3',
+  combat: '/sounds/combat_music_1.mp3',
 } as const
 
 const sfxTemplates: Record<string, HTMLAudioElement> = {}

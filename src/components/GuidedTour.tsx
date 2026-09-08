@@ -75,6 +75,7 @@ export function GuidedTour() {
   const advanceTour = useGameStore((s) => s.advanceTour)
   const endTour = useGameStore((s) => s.endTour)
 
+  const phase = useGameStore((s) => s.phase)
   const resolved = tourIndex === null ? null : currentTourStep(tourIndex, view)
   const step = resolved?.step
   const rect = useTargetRect(step?.target)
@@ -83,6 +84,13 @@ export function GuidedTour() {
   useEffect(() => {
     if (step) playSfx(SFX.frogCroak, 0.4)
   }, [step?.id])
+
+  // In-view actions (answering a question) don't change screen, so they need an
+  // explicit trigger or the step would sit there forever.
+  useEffect(() => {
+    if (!resolved || resolved.step.advanceOn !== 'answered') return
+    if (phase === 'feedback') advanceTour(resolved.index + 1)
+  }, [phase, resolved, advanceTour])
 
   // The player navigated past this step's screen - catch the tour up.
   useEffect(() => {

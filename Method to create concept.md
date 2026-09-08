@@ -1,0 +1,7 @@
+When the user clicks on the chapter they have two options of if they wana go Learn content ,Quiz Dugen . use the sci fi and use the background music of combat music  1 
+
+Where on this the user can walk with his charector in a 2d space in the map where u use the npcs from the assets of text_npc where they explain the concepts of the lesson like each can take lke on of the major headings but still limit the total number of npcs to a minmum. Make sure the concepts thought are related to the concpet of simulation so that the user understands the concpets of the topic and has enough kowladge to solve and work with the it  like when u talk to the npc the screen is split to two and the the npc like as if it was a a chat explains the concepts of it and too keep it a chat box the player can ask questions which the npc will answer in the same tone with a api key for that and also give each of them unique charctor speaking styles and have those context of the conpeet they are explaining they tone and everything to the llm followed by the questions of the user and the user will go threw them 
+
+It will be finally the user will meet the frog sprite which will tell time to test ur concept and show u a simulation which the user can play with and maybe try and solve a question or just try out with it after which the user can directly go from there to the quiz dungens 
+
+For all of this keep the style constant from the orginal theme that we  setup asa 2d pixel style 

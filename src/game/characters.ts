@@ -2,6 +2,10 @@ import type { ContentBox, SpriteSheetDef } from '../types'
 
 export type CharacterAnim =
   | 'idle'
+  | 'run'
+  | 'jumpUp'
+  | 'jumpDown'
+  | 'roll'
   | 'attack'
   | 'attack2'
   | 'attack3'
@@ -118,6 +122,14 @@ export const characters: CharacterDef[] = [
         row: 0,
         content: HERO_BODY,
       },
+      run: {
+        src: '/sprites/player/move.png',
+        frameWidth: 128,
+        frameHeight: 128,
+        frameCount: 6,
+        row: 0,
+        content: HERO_BODY,
+      },
       attack: {
         src: '/sprites/player/attack.png',
         frameWidth: 128,
@@ -147,6 +159,10 @@ export const characters: CharacterDef[] = [
     avatarCrop: elementalsAvatar(FIRE_KNIGHT_ANCHOR),
     sheets: elementals('fire-knight', FIRE_KNIGHT_ANCHOR, {
       idle: 8,
+      run: 8,
+      jumpUp: 3,
+      jumpDown: 3,
+      roll: 8,
       attack: 11,
       attack2: 19,
       attack3: 28,
@@ -167,6 +183,10 @@ export const characters: CharacterDef[] = [
     avatarCrop: elementalsAvatar(GROUND_MONK_ANCHOR),
     sheets: elementals('ground-monk', GROUND_MONK_ANCHOR, {
       idle: 6,
+      run: 8,
+      jumpUp: 3,
+      jumpDown: 3,
+      roll: 6,
       attack: 6,
       attack2: 12,
       attack3: 23,
@@ -207,6 +227,10 @@ export const characters: CharacterDef[] = [
     },
     sheets: elementals('leaf-ranger', LEAF_RANGER_ANCHOR, {
       idle: 12,
+      run: 10,
+      jumpUp: 3,
+      jumpDown: 3,
+      roll: 8,
       attack: 10,
       attack2: 15,
       attack3: 12,
@@ -227,6 +251,10 @@ export const characters: CharacterDef[] = [
     avatarCrop: elementalsAvatar(WIND_HASHASHIN_ANCHOR),
     sheets: elementals('wind-hashashin', WIND_HASHASHIN_ANCHOR, {
       idle: 8,
+      run: 8,
+      jumpUp: 3,
+      jumpDown: 3,
+      roll: 6,
       attack: 8,
       attack2: 18,
       attack3: 26,
@@ -248,6 +276,11 @@ export function getCharacter(id: string): CharacterDef {
 // take-hit or block), so each one degrades to the closest thing it does have.
 const ANIM_FALLBACK: Record<CharacterAnim, CharacterAnim[]> = {
   idle: [],
+  run: ['idle'],
+  // The hero pack has no jump or roll art, so it simply stays on its feet.
+  jumpUp: ['idle'],
+  jumpDown: ['jumpUp', 'idle'],
+  roll: ['run', 'idle'],
   attack: ['idle'],
   attack2: ['attack', 'idle'],
   attack3: ['attack2', 'attack', 'idle'],
@@ -260,6 +293,10 @@ const ANIM_FALLBACK: Record<CharacterAnim, CharacterAnim[]> = {
 
 const ANIM_FPS: Record<CharacterAnim, number> = {
   idle: 8,
+  run: 12,
+  jumpUp: 9,
+  jumpDown: 9,
+  roll: 14,
   attack: 14,
   attack2: 16,
   attack3: 16,
@@ -269,6 +306,9 @@ const ANIM_FPS: Record<CharacterAnim, number> = {
   hurt: 12,
   death: 10,
 }
+
+/** Animations that repeat for as long as the state lasts; everything else is a one-shot. */
+const LOOPING: CharacterAnim[] = ['idle', 'run']
 
 export interface ResolvedAnim {
   sheet: SpriteSheetDef
@@ -285,8 +325,7 @@ export function resolveAnim(character: CharacterDef, wanted: CharacterAnim): Res
     sheet: character.sheets[anim]!,
     anim,
     fps: ANIM_FPS[anim],
-    // If we fell back to idle, loop it - a held idle frame looks broken.
-    playOnce: anim !== 'idle',
+    playOnce: !LOOPING.includes(anim),
   }
 }
 
