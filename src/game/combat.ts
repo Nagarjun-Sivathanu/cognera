@@ -23,6 +23,7 @@ function toInstance(def: EnemyDef): EnemyInstance {
     sprite: def.sprite,
     flip: def.flip,
     difficulty: def.difficulty,
+    displayHeight: def.displayHeight,
     maxHp: def.baseHp,
     currentHp: def.baseHp,
     damage: def.baseDamage,
@@ -34,7 +35,7 @@ function randInt(min: number, max: number): number {
 }
 
 /** Fills a difficulty budget with randomly chosen enemies whose difficulties sum to it. */
-function generateEncounter(budget: number): EnemyInstance[] {
+export function generateEncounter(budget: number): EnemyInstance[] {
   const encounter: EnemyInstance[] = []
   let remaining = budget
   // safety cap so a bad budget config can't loop forever
@@ -66,6 +67,22 @@ export function rollDamage(power: number): number {
 export function xpForEnemy(difficulty: number): number {
   return difficulty * 10
 }
+
+// Focus is the resource active skills spend. It fills only from correct answers, and
+// a run of consecutive correct answers fills it faster - so playing well academically
+// is what unlocks the flashy abilities.
+export const FOCUS_MAX = 100
+const FOCUS_PER_CORRECT = 18
+const FOCUS_STREAK_BONUS = 6
+const FOCUS_STREAK_CAP = 4
+
+/** Focus gained for a correct answer, given the streak length *including* this answer. */
+export function focusGain(streak: number): number {
+  return FOCUS_PER_CORRECT + Math.min(Math.max(streak - 1, 0), FOCUS_STREAK_CAP) * FOCUS_STREAK_BONUS
+}
+
+/** Burn ticks for this fraction of the player's attack power each turn. */
+export const BURN_POWER = 0.6
 
 // Battle action tuning - adjust here if the balance feels off.
 export const DODGE_CHANCE = 0.5

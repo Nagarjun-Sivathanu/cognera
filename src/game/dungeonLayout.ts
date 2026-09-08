@@ -82,6 +82,34 @@ function generateDungeonLayout(): DungeonDef[] {
 // Computed once per session (module load).
 export const dungeons: DungeonDef[] = generateDungeonLayout()
 
+// Sandbox waves ramp their difficulty budget instead of using a fixed tier.
+export const SANDBOX_START_BUDGET = 2
+export const SANDBOX_MAX_BUDGET = 16
+
+export function sandboxBudgetForWave(wave: number): number {
+  return Math.min(SANDBOX_MAX_BUDGET, SANDBOX_START_BUDGET + Math.floor(wave * 0.8))
+}
+
+/**
+ * A synthetic dungeon for Sandbox runs. `subjectId` of null mixes every subject.
+ * It never appears in the dungeon list - the run carries it directly.
+ */
+export function createSandboxDungeon(subjectId: string | null): DungeonDef {
+  const template = subjectId ? SUBJECTS.find((s) => s.id === subjectId) : undefined
+  const subjects = template ? [template.subject] : SUBJECTS.map((s) => s.subject)
+  return {
+    id: `sandbox-${subjectId ?? 'all'}`,
+    name: template ? `${template.name} Sandbox` : 'Endless Sandbox',
+    tier: 'Easy', // starting point only; sandbox loot scales off waves survived
+    subjects,
+    topics: subjects.flatMap((s) => topicsForSubject(s)),
+    encounterCount: 0, // unbounded - waves are appended as they're cleared
+    budgetRange: [SANDBOX_START_BUDGET, SANDBOX_START_BUDGET],
+    backgrounds: pickBackgrounds(4),
+    requiredLevel: 1,
+  }
+}
+
 export function dungeonsForSubject(subjectId: string): DungeonDef[] {
   const template = SUBJECTS.find((s) => s.id === subjectId)
   if (!template) return []

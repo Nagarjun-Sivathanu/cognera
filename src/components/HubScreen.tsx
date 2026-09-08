@@ -11,7 +11,7 @@ interface ModeTile {
 
 const MODES: ModeTile[] = [
   { key: 'dungeon', label: 'Dungeon Mode', description: 'PvE quiz dungeon crawl', available: true },
-  { key: 'sandbox', label: 'Sandbox Mode', description: 'Free practice, no stakes', available: false },
+  { key: 'sandbox', label: 'Sandbox Mode', description: 'Endless waves, escalating difficulty', available: true },
   { key: 'pvp', label: 'PvP Mode', description: 'Battle other players', available: false },
   { key: 'leaderboard', label: 'Leaderboard', description: 'Global & subject rankings', available: false },
   { key: 'guild', label: 'Guild', description: 'Join a guild, compete together', available: false },
@@ -59,6 +59,7 @@ function NameTag() {
 
 export function HubScreen() {
   const enterMap = useGameStore((s) => s.enterMap)
+  const enterSandbox = useGameStore((s) => s.enterSandbox)
 
   return (
     <div className="relative min-h-[calc(100vh-64px)] overflow-hidden">
@@ -79,7 +80,10 @@ export function HubScreen() {
             key={mode.key}
             type="button"
             disabled={!mode.available}
-            onClick={() => mode.key === 'dungeon' && enterMap()}
+            onClick={() => {
+              if (mode.key === 'dungeon') enterMap()
+              if (mode.key === 'sandbox') enterSandbox()
+            }}
             className="rounded-lg border-2 border-amber-800 bg-stone-950/80 p-4 text-left shadow-lg transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100"
           >
             <div className="flex items-center justify-between">

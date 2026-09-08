@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { dungeonsForSubject, SUBJECTS, TIER_CONFIG } from '../game/dungeonLayout'
-import { getLevel } from '../game/player'
 import { useGameStore } from '../store/gameStore'
 import type { DifficultyTier, DungeonDef } from '../types'
 
@@ -29,8 +28,6 @@ const TIER_NUMERAL: Record<DifficultyTier, string> = {
 function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
   const [hovered, setHovered] = useState(false)
   const startRun = useGameStore((s) => s.startRun)
-  const playerLevel = useGameStore((s) => getLevel(s.player.xp))
-  const locked = playerLevel < dungeon.requiredLevel
   const pos = NODE_POSITIONS[dungeon.tier]
 
   return (
@@ -42,9 +39,8 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
     >
       <button
         type="button"
-        disabled={locked}
         onClick={() => startRun(dungeon.id)}
-        className={`relative flex h-20 w-20 items-center justify-center rounded-full border-4 bg-stone-950/90 shadow-lg transition hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-40 disabled:grayscale ${TIER_RING[dungeon.tier]}`}
+        className={`relative flex h-20 w-20 items-center justify-center rounded-full border-4 bg-stone-950/90 shadow-lg transition hover:brightness-125 ${TIER_RING[dungeon.tier]}`}
       >
         <span className="font-medieval text-2xl text-stone-100">{TIER_NUMERAL[dungeon.tier]}</span>
       </button>
@@ -52,13 +48,10 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
 
       {hovered && (
         <div className="absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-md border border-stone-700 bg-stone-950 p-3 text-sm text-stone-300 shadow-xl">
-          <p className="font-semibold text-stone-100">
-            {dungeon.tier} · Lv {dungeon.requiredLevel}+
-          </p>
+          <p className="font-semibold text-stone-100">{dungeon.tier}</p>
           <p className="mt-1 text-stone-400">{TIER_CONFIG[dungeon.tier].description}</p>
           <p className="mt-2 font-semibold text-stone-100">Topics covered</p>
           <p className="mt-0.5">{dungeon.topics.join(', ')}</p>
-          {locked && <p className="mt-2 text-red-400">Locked — reach level {dungeon.requiredLevel}.</p>}
         </div>
       )}
     </div>
@@ -67,7 +60,8 @@ function DungeonNode({ dungeon }: { dungeon: DungeonDef }) {
 
 export function DungeonMap() {
   const selectedSubjectId = useGameStore((s) => s.selectedSubjectId)
-  const backToSubjects = useGameStore((s) => s.backToSubjects)
+  const selectedChapter = useGameStore((s) => s.selectedChapter)
+  const backToChapters = useGameStore((s) => s.backToChapters)
   const subject = SUBJECTS.find((s) => s.id === selectedSubjectId)
   const dungeons = selectedSubjectId ? dungeonsForSubject(selectedSubjectId) : []
 
@@ -82,14 +76,16 @@ export function DungeonMap() {
       <div className="relative z-10 flex items-center justify-between px-4 py-3">
         <div>
           <p className="font-medieval text-lg text-amber-200 drop-shadow-md">{subject?.subject ?? 'Dungeons'}</p>
-          <p className="text-xs text-stone-300 drop-shadow-md">{subject?.name}</p>
+          <p className="text-xs text-stone-300 drop-shadow-md">
+            {subject?.name} · {selectedChapter ?? 'Total Revision'}
+          </p>
         </div>
         <button
           type="button"
-          onClick={backToSubjects}
+          onClick={backToChapters}
           className="font-medieval rounded border border-stone-600 bg-stone-900/70 px-3 py-1.5 text-sm text-stone-200 hover:bg-stone-800"
         >
-          ← Subjects
+          ← Chapters
         </button>
       </div>
 

@@ -1,4 +1,5 @@
 import skillsData from '../data/skills.json'
+import { DEFAULT_CHARACTER_ID } from './characters'
 import type { PlayerState, SkillNode, StatKey, Subject } from '../types'
 
 const skills = skillsData as SkillNode[]
@@ -50,6 +51,7 @@ export function getLootLuckPercent(player: PlayerState): number {
 export function createNewPlayer(): PlayerState {
   return {
     name: 'Hero',
+    characterId: DEFAULT_CHARACTER_ID,
     level: 1,
     xp: 0,
     currentHp: 30,
@@ -59,6 +61,7 @@ export function createNewPlayer(): PlayerState {
     potions: 1,
     skillPoints: 0,
     unlockedSkills: {},
+    unlockedActiveSkills: [],
     equipped: {},
     inventory: [],
     subjectStats: {},

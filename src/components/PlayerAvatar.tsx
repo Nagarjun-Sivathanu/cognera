@@ -1,26 +1,27 @@
-// Crops the head/shoulders region out of the player's idle sprite frame (row 0, col 0)
-// to fake a portrait, since the asset pack has no dedicated head icon.
-// Measured directly from the sprite: the character occupies roughly (54,50)-(73,80)
-// in the 128px frame, so a 24x24 window at (51,46) frames the head with a hint of shoulder.
-const SHEET_SIZE = 512 // full idle.png sheet is 512x512 (4x4 grid of 128px frames)
-const CROP_X = 51
-const CROP_Y = 46
-const CROP_SIZE = 24
+import { getCharacter } from '../game/characters'
+import { useGameStore } from '../store/gameStore'
+import { Sprite } from './Sprite'
 
-export function PlayerAvatar({ size = 56 }: { size?: number }) {
-  const zoom = size / CROP_SIZE
+/**
+ * Portrait built by cropping the head out of the character's idle sprite - none of
+ * the packs ship a dedicated portrait. The wrapper clips the rest of the body,
+ * since Sprite deliberately lets art overflow its anchor box.
+ */
+export function PlayerAvatar({ size = 56, characterId }: { size?: number; characterId?: string }) {
+  const playerCharacterId = useGameStore((s) => s.player.characterId)
+  const character = getCharacter(characterId ?? playerCharacterId)
+  const idle = character.sheets.idle!
 
   return (
     <div
       className="shrink-0 overflow-hidden rounded-full border-2 border-amber-700 bg-stone-900 shadow-md"
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: 'url(/sprites/player/idle.png)',
-        backgroundSize: `${SHEET_SIZE * zoom}px ${SHEET_SIZE * zoom}px`,
-        backgroundPosition: `-${CROP_X * zoom}px -${CROP_Y * zoom}px`,
-        imageRendering: 'pixelated',
-      }}
-    />
+      style={{ width: size, height: size }}
+    >
+      <Sprite
+        sheet={{ ...idle, frameCount: 1, content: character.avatarCrop }}
+        displayHeight={size}
+        fps={1}
+      />
+    </div>
   )
 }

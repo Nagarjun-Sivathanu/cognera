@@ -14,11 +14,16 @@ Manually: `npm install` once, then `npm run dev`, then open the printed `http://
 Title screen (animated parallax cave)
   -> Hub (avatar + name, mode tiles)
     -> Dungeon Mode -> Subject picker (Math / Physics / Chemistry / Biology, no levels)
-      -> Tier map for that subject (Easy / Medium / Moderate / Hard, scattered, level-gated, no path)
-        -> Battle (top: battlefield: player + staggered enemy formation.
-                    bottom: command panel [Bag/Stagger/Dodge/Wind Up/Retreat] + quiz panel)
-          -> Result screen (XP / loot / skill points) -> back to tier map
-  Sandbox / PvP / Leaderboard / Guild tiles exist but are "Coming Soon" placeholders.
+      -> Chapter picker (Total Revision, or one specific chapter)
+        -> Tier map for that subject (Easy / Medium / Moderate / Hard, scattered, no path, all unlocked)
+          -> Battle (top: battlefield: player + staggered enemy formation.
+                      bottom: command panel [Bag/Stagger/Dodge/Wind Up/Flame Arts/Retreat]
+                              + Focus bar + quiz panel)
+            -> Result screen (XP / loot / skill points) -> back to tier map
+    -> Sandbox Mode -> pick one subject or All
+      -> Endless waves, difficulty budget ramping each wave
+        -> Result screen paid out by waves survived -> back to hub
+  PvP / Leaderboard / Guild tiles exist but are "Coming Soon" placeholders.
 ```
 
 ## Architecture at a glance
@@ -29,7 +34,10 @@ Title screen (animated parallax cave)
   - `src/data/questions.json` — hand-written Biology placeholders (no real Biology dataset yet).
   - `src/data/questions-jee.json` — generated output of `scripts/convert_questions.py`, which converts the raw dataset in `Question data set/` (real JEE-style Math/Physics/Chemistry questions) into the game's schema. Re-run the script if the raw dataset changes.
   - `src/game/dungeonLayout.ts` — builds the subject → tier dungeon list at module load (one random-difficulty-tier-per-subject was the old model; now every subject gets all four tiers as fixed sub-dungeons).
-- **Art**: `public/sprites/` holds only the specific files actually used by the game (player, 10 enemies, cave backgrounds, fight-scene GIFs), sliced/cropped from the much larger raw pack in `Assets/` (gitignored — too large and mostly unused to track). `src/components/SpriteSheet.tsx` is the generic frame-stepping animator everything renders through.
+- **Art**: `public/sprites/` holds only the specific files actually used by the game (player + equipment layers, 10 enemies, cave backgrounds, fight-scene GIFs, item icon sheet, fire VFX), sliced/cropped from the much larger raw pack in `Assets/` (gitignored — too large and mostly unused to track). `src/components/Sprite.tsx` is the animator everything renders through.
+  - Sprites come from several packs at wildly different intrinsic sizes (a rabbit is 13×18 source px, a pengu is 82×94) and are anchored inconsistently inside their frames. So a sprite is positioned and scaled by a **content box** — the measured bounding box of its drawn pixels — not by its frame. `scripts/measure_sprites.py` produces those numbers; `displayHeight` in `enemies.json` sets how tall each enemy renders. The box is an anchor, not a crop: sword swings and impact FX deliberately overflow it, and all of a character's animations share one box so it never jumps when switching animation.
+  - **Equipment** renders as extra layers over the base sheet (`src/game/playerSprite.ts`). The layers are frame-aligned with the base art, so they just stack. The pack ships one design per layer, so rarity is conveyed by CSS tint (`src/game/rarity.ts`) rather than different artwork.
+  - **Playable characters** live in `src/game/characters.ts`: five bodies, each with its own animation set (idle / attack / special / defend / hurt / death) and a shared anchor box across all of its animations, so switching animation never moves or resizes the character. Animations that a character lacks degrade to the closest one it has. Only the Adventurer wears the modular armour layers — the rest have baked-in outfits, so gear is stat-only for them. `scripts/build_characters.py` regenerates the sheets from the raw packs.
 - **Audio**: `src/game/audio.ts` — thin wrapper over `HTMLAudioElement` for one-shot SFX and a single looping BGM track at a time. Raw sound sources live in `sounds/` (gitignored); the served copies are in `public/sounds/`.
 - **Combat tuning**: difficulty-budget/tier constants live in `src/game/dungeonLayout.ts` (`TIER_CONFIG`); damage/action-chance constants (dodge %, stagger %, wind-up multipliers, heal fraction) live in `src/game/combat.ts` — both are the places to retune balance after playtesting.
 
@@ -37,28 +45,35 @@ Title screen (animated parallax cave)
 
 - Full navigation flow above, verified end to end.
 - Turn-based combat where damage scales with player attack power (gear/level/skills), so a leveled-up player can one-shot weak enemies.
-- Battle actions: Attack (default), Bag (heal), Stagger (stun chance), Dodge (evasion chance), Wind Up (risk/reward damage modifier), Retreat.
-- Randomized loot (5 rarities, tier-weighted odds) and a small passive skill tree.
-- Real question content: 942 converted JEE-style Math/Physics/Chemistry questions plus a handful of Biology placeholders.
+- Battle actions: Attack (default), Bag (heal), Stagger (stun chance), Dodge (evasion chance), Wind Up (risk/reward damage modifier), Flame Arts (active skills), Retreat.
+- **Focus**: a bar that fills only from correct answers — faster the longer your streak — and is spent casting Flame Arts. It's the mechanical link between answering well and combat power.
+- **Equipment**: 7 slots, 6 of them visible on the Adventurer's sprite, with rarity tinting and real item icons.
+- **Five playable characters**, swappable at any time from the character sheet's Hero tab, each animating per battle action (attack / take-hit / block / special / death).
+- Randomized loot (5 rarities, tier-weighted odds), a passive skill tree, and 4 unlockable active skills.
+- Real question content: ~912 usable converted JEE-style Math/Physics/Chemistry questions plus Biology placeholders, filterable by chapter.
+- **Sandbox**: endless escalating waves with rewards scaled to depth.
 - Sound: background music that switches with navigation, and SFX for hits/damage/deathblow/menu clicks.
-- Local save/load of player progress (level, XP, gear, inventory, potions, skill points, subject accuracy stats).
+- Local save/load of player progress (level, XP, gear, inventory, potions, skill points, learned skills, subject accuracy stats), with migration for saves from the old 3-slot equipment model.
+- Accessibility: text size controls on every screen.
 
 ## Known gaps / deliberate placeholders
 
-- **Sandbox, PvP, Leaderboard, Guild** — UI tiles exist, nothing behind them yet.
+- **PvP, Leaderboard, Guild** — UI tiles exist, nothing behind them yet.
+- **No difficulty-5 questions exist.** The dataset tops out at difficulty 4, but the Hard tier's boss (Gollux) is difficulty 5, so it falls back to the closest available question. Hard fights never get a genuinely "hardest" question tier.
 - **No accounts/backend** — progress is per-browser (`localStorage`) only; not shared across devices.
 - **Biology has no real dataset** — still using the original 4 hand-written placeholder questions.
 - **Class 12 Physics has almost no content** — both source files (Current Electricity, Electrostatics) had no answer keys in the raw data, so nothing could be converted from them. Only the two Class 11 Physics chapters (Circular Motion, Fluid Mechanics) are populated.
-- **Unused assets sitting ready**: the player's modular equipment layers (so gear could visually change the character), a 196-icon weapon sheet (for inventory art), fire-skill VFX (for hit impacts or a future skill tree), the horse+rider set (needs layering work), a wood-panel bitmap font (needs a character-order map to be usable — currently substituting the "MedievalSharp" Google Font), and several sound files (`combat_music_1/2`, `helping_frog`, `player_getting_hit_0`, `sword-slash*`) with no assigned purpose yet.
+- **Unused assets still sitting ready**: the horse+rider set (needs layering work), the plains parallax backgrounds (only the cave set is used), a wood-panel bitmap font (needs a character-order map to be usable — currently substituting the "MedievalSharp" Google Font), the remaining fire VFX (Fire I/III, Napalm, Incendiary, Burn Debuff variants — four of the packs' effects are wired to skills, the rest aren't), and several sound files (`combat_music_1/2`, `helping_frog`, `player_getting_hit_0`, `sword-slash*`) with no assigned purpose yet.
 - **Not deployed** — runs locally only; no public Vercel/Netlify link yet.
 - **No automated tests** — correctness has been verified through manual Playwright-driven smoke checks during development, not a persisted test suite.
 
 ## Natural next steps
 
 Roughly in likely priority order, not a commitment:
-1. Wire up the remaining sound files (combat music, sword-slash, potion sound) once their intended use is confirmed.
+1. Wire up the remaining sound files — combat music during battle, sword-slash on hit, a potion sound on Bag, and a cast sound for Flame Arts.
 2. Real Biology content (and Class 12 Physics, if an answer-keyed source turns up).
-3. Visual polish: equip-able gear actually changing the player sprite, item icons in the inventory.
-4. Deploy to a public URL for sharing/demoing.
-5. Sandbox / PvP / Leaderboard / Guild — pick one to build out next.
-6. Balance pass on the numbers in `combat.ts` / `dungeonLayout.ts` once there's been real playtesting.
+3. Deploy to a public URL for sharing/demoing.
+4. PvP / Leaderboard / Guild — pick one to build out next.
+5. Balance pass on `combat.ts` (focus gain, skill costs, dodge/stagger odds) and `dungeonLayout.ts` (tier budgets, sandbox ramp) once there's been real playtesting.
+6. More enemy animations — only idle sheets are wired up; the packs also ship attack/hurt/move animations that could play on hit and on the enemy's counter-attack. The player characters already animate per action, so the enemies are the remaining half of that.
+7. The Elementals packs also include run/roll/jump animations and the Leaf Ranger's arrow projectiles, none of which the turn-based battle uses yet.

@@ -1,23 +1,24 @@
+import { RARITY_TEXT } from '../game/rarity'
 import type { LastRunResult } from '../types'
-
-const RARITY_COLOR: Record<string, string> = {
-  Common: 'text-stone-300',
-  Uncommon: 'text-emerald-400',
-  Rare: 'text-sky-400',
-  Epic: 'text-purple-400',
-  Legendary: 'text-amber-400',
-}
+import { ItemIcon } from './ItemIcon'
 
 export function ResultModal({ result, onContinue }: { result: LastRunResult; onContinue: () => void }) {
+  const sandbox = result.outcome === 'sandbox'
   const cleared = result.outcome === 'cleared'
+  const good = cleared || sandbox
+
+  const title = sandbox ? 'Run Over' : cleared ? 'Dungeon Cleared!' : 'You Fell...'
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-lg border border-stone-700 bg-stone-950 p-6 text-center">
-        <h2 className={`text-2xl font-bold ${cleared ? 'text-emerald-400' : 'text-red-400'}`}>
-          {cleared ? 'Dungeon Cleared!' : 'You Fell...'}
-        </h2>
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/75 p-4">
+      <div className="w-full max-w-md rounded-lg border-4 border-amber-950 bg-[#241a10] p-6 text-center shadow-2xl">
+        <h2 className={`font-medieval text-2xl ${good ? 'text-emerald-400' : 'text-red-400'}`}>{title}</h2>
         <p className="mt-1 text-stone-400">{result.dungeonName}</p>
+        {sandbox && (
+          <p className="font-medieval mt-2 text-lg text-amber-300">
+            {result.wavesSurvived} {result.wavesSurvived === 1 ? 'wave' : 'waves'} survived
+          </p>
+        )}
 
         <div className="mt-4 space-y-2 text-left text-sm text-stone-200">
           <p>
@@ -31,24 +32,33 @@ export function ResultModal({ result, onContinue }: { result: LastRunResult; onC
           {result.lootGained.length > 0 && (
             <div>
               <p className="font-semibold text-stone-100">Loot:</p>
-              <ul className="ml-4 list-disc">
+              <ul className="mt-1 space-y-1">
                 {result.lootGained.map((item) => (
-                  <li key={item.id} className={RARITY_COLOR[item.rarity]}>
-                    {item.name} (+{item.value} {item.stat})
+                  <li key={item.id} className="flex items-center gap-2">
+                    <ItemIcon item={item} size={24} />
+                    <span className={RARITY_TEXT[item.rarity]}>
+                      {item.name}{' '}
+                      <span className="text-xs text-stone-500">
+                        (+{item.value} {item.stat})
+                      </span>
+                    </span>
                   </li>
                 ))}
               </ul>
             </div>
           )}
-          {!cleared && <p className="text-stone-400">No loot this time — partial XP kept from defeated enemies.</p>}
+          {!good && <p className="text-stone-400">No loot this time — partial XP kept from defeated enemies.</p>}
+          {sandbox && result.lootGained.length === 0 && (
+            <p className="text-stone-400">Survive 3 waves or more to earn loot.</p>
+          )}
         </div>
 
         <button
           type="button"
           onClick={onContinue}
-          className="mt-6 w-full rounded bg-sky-600 px-4 py-2 font-semibold text-white hover:bg-sky-500"
+          className="font-medieval mt-6 w-full rounded border-2 border-amber-700 bg-amber-950/80 px-4 py-2 text-amber-200 hover:bg-amber-900/80"
         >
-          Return to Dungeons
+          {sandbox ? 'Return to Hub' : 'Return to Dungeons'}
         </button>
       </div>
     </div>

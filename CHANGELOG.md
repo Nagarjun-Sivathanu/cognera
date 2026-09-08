@@ -2,6 +2,29 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Add selectable characters with full battle animations
+
+- **Five playable characters**, chosen from a new Hero tab in the character sheet: the original Adventurer plus Fire Knight, Ground Monk, Leaf Ranger and Wind Hashashin from the Elementals packs. The picker previews each one animating on hover. The choice is cosmetic — stats, gear and skills come with you — and it's saved with your progress.
+- **The character now acts out the fight.** Each action plays its own animation instead of everything being idle-or-attack: attack on a correct answer, take-hit on a wrong one, block on a successful Dodge or a potion, a full special-attack animation when casting a Flame Art, and a death animation when you fall (the result screen waits for it to finish).
+- The Elementals characters ship their own outfits, so **armour isn't forced on top of them** — gear stays stat-only there and is only drawn on the Adventurer, whose modular layers are built for it. The picker labels which is which.
+- Portraits are now generated per character by cropping the head from its idle sheet, so the HUD avatar matches whoever you're playing.
+- `scripts/build_characters.py` packs the packs' per-frame PNGs into game-ready strips and derives each character's anchor box. It centres the anchor on the frame's centre line rather than the raw sprite bounds, so characters with long weapons (the knight's greatsword, the ranger's bow) stand centred instead of being shoved sideways by their own weapon.
+
+## Add equipment, flame skills, chapter revision and sandbox mode
+
+- **Fixed: enemies above difficulty 3 were invisible.** Not a missing asset — `EnemyCard` rendered each sprite at 512×512 inside a 132×132 centred crop, so only the middle ~33px of a frame was ever on screen. Small mobs happen to sit in that band; the bigger ones are bottom-anchored in their frames and fell outside it entirely. Sprites are now sized and aligned by a measured content box (`scripts/measure_sprites.py`), so every enemy is fully visible, they share a floor line, and bosses are genuinely bigger than trash mobs.
+- **Fixed: Dino Tri's sheet was sliced wrong** — it's 6 frames of 384×128, not 18 of 128×128, so most of its frames were blank.
+- **Fixed: the same question could repeat immediately.** The normal Attack path never recorded its question as used; only Bag/Dodge/Stagger did.
+- **Equipment**: seven slots (Weapon, Helmet, Chest, Legs, Hands, Boots, Trinket), six of which render as layers on the character sprite. Rarity is shown by tint on the gear and by the icon sheet's own colour rows for weapons/shields. Loot rolls real item icons from the 196-icon sheet, and the attack animation's swing FX is wired up as the clash effect.
+- **Character page** rebuilt as a wood-panelled sheet: Gear / Skills / Stats tabs, a paper doll wearing your actual equipment, and a grid inventory of item icons with rarity borders and hover tooltips.
+- **Flame Arts**: four unlockable active skills (Fireball, Ignite, Meteor Shower, Ember Guard) that spend **Focus** — a bar that fills only from correct answers, faster on a streak. Each plays its effect from the fire VFX packs over the battlefield.
+- **Chapter revision**: subject now leads to a chapter screen — Total Revision (all chapters) or a single chapter — before the tier map, and questions are filtered to that chapter for the whole run.
+- **Sandbox mode** is live: pick one subject or all, then fight endless waves whose difficulty budget ramps each wave. There's no clear condition — you play until you fall or retreat, and XP, loot and skill points are paid out scaled to how far you got.
+- **All difficulty tiers unlocked** — the level gate on the tier map is gone.
+- **Text size controls** (A− / A+) on every screen, persisted to localStorage.
+- Dropped 30 questions whose options had been reduced to bare letters ("(A)", "(B)") during conversion — they were unanswerable.
+- Nudged the `torch-3` battle background off its baked-in black stairwell void so fighters no longer stand in an empty corner.
+
 ## Add sound design and fix battle screen layout
 
 - Removed the bordered box around enemy cards so they match the player's borderless look (sprite + name + HP bar only).

@@ -1,39 +1,46 @@
+import { getCharacter, resolveAnim, type CharacterAnim } from '../game/characters'
 import { getAttackPower, getMaxHp } from '../game/player'
+import { ATTACK_FX_LAYER, equipmentLayers } from '../game/playerSprite'
 import { useGameStore } from '../store/gameStore'
-import type { SpriteSheetDef } from '../types'
-import { SpriteSheet } from './SpriteSheet'
-
-const IDLE_SHEET: SpriteSheetDef = { src: '/sprites/player/idle.png', frameSize: 128, frameCount: 4, row: 0 }
-const ATTACK_SHEET: SpriteSheetDef = { src: '/sprites/player/attack.png', frameSize: 128, frameCount: 6, row: 0 }
+import { Sprite } from './Sprite'
 
 interface Props {
-  attacking: boolean
-  hurt: boolean
+  anim: CharacterAnim
   charged?: boolean
 }
 
 // No card/border around the player, per design: only enemies get boxed cards.
-export function PlayerPanel({ attacking, hurt, charged }: Props) {
+export function PlayerPanel({ anim, charged }: Props) {
   const player = useGameStore((s) => s.player)
   const maxHp = getMaxHp(player)
   const hpPercent = Math.max(0, (player.currentHp / maxHp) * 100)
 
+  const character = getCharacter(player.characterId)
+  const resolved = resolveAnim(character, anim)
+  const hurt = anim === 'hurt' || anim === 'death'
+
+  // The armour layers are drawn to match the original hero's frames only; the
+  // Elementals characters wear their own art.
+  let layers = character.wearsEquipment
+    ? equipmentLayers(player.equipped, resolved.anim === 'attack' ? 'attack' : 'idle')
+    : []
+  if (character.wearsEquipment && resolved.anim === 'attack') layers = [...layers, ATTACK_FX_LAYER]
+
   return (
-    <div className={`w-48 text-center transition ${hurt ? 'brightness-150' : ''}`}>
-      <div
-        className={`flex h-40 w-40 items-center justify-center overflow-hidden drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)] ${hurt ? 'animate-pulse' : ''} ${
+    <div className={`flex w-48 flex-col items-center text-center transition ${hurt ? 'brightness-150' : ''}`}>
+      <Sprite
+        // Remounting per animation restarts one-shots (two hits in a row must both play).
+        key={resolved.anim}
+        sheet={resolved.sheet}
+        displayHeight={character.displayHeight}
+        layers={layers}
+        fps={resolved.fps}
+        playOnce={resolved.playOnce}
+        className={`drop-shadow-[0_8px_14px_rgba(0,0,0,0.6)] ${hurt ? 'animate-pulse' : ''} ${
           charged ? 'drop-shadow-[0_0_16px_rgba(56,189,248,0.8)]' : ''
         }`}
-      >
-        <SpriteSheet
-          sheet={attacking ? ATTACK_SHEET : IDLE_SHEET}
-          fps={attacking ? 12 : 6}
-          playOnce={attacking}
-          scale={4.5}
-          className="shrink-0"
-        />
-      </div>
-      <p className="font-medieval text-lg text-stone-100 drop-shadow-md">{player.name}</p>
+      />
+      <p className="font-medieval mt-1 text-lg text-stone-100 drop-shadow-md">{player.name}</p>
       <p className="text-xs text-amber-300 drop-shadow-md">
         Attack {getAttackPower(player)}
         {charged && <span className="ml-1 text-sky-300">(Charged!)</span>}
