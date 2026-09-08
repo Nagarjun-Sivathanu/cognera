@@ -120,6 +120,7 @@ export interface RunState {
   correctStreak: number // consecutive correct answers; a longer streak fills focus faster
   burn: number // turns of burn damage left on the current enemy
   attackBuffTurns: number // turns of the flame buff's attack bonus left
+  swapCooldown: number // turns until the character can be swapped again
 }
 
 export interface PlayerState {

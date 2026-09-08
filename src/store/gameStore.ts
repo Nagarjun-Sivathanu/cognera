@@ -1,18 +1,19 @@
 import { create } from 'zustand'
 import { BUFF_ATTACK_MULTIPLIER, getActiveSkill } from '../game/activeSkills'
 import { BGM, playBgm, playSfx, SFX } from '../game/audio'
-import type { CharacterAnim } from '../game/characters'
+import { characters, getCharacter, type CharacterAnim } from '../game/characters'
 import {
   BAG_HEAL_FRACTION,
   BURN_POWER,
   DODGE_CHANCE,
+  DODGE_STAGGER_CHANCE,
   FOCUS_MAX,
+  SWAP_COOLDOWN_TURNS,
   focusGain,
   generateEncounter,
   generateEncounters,
   POTIONS_PER_CLEAR,
   rollDamage,
-  STAGGER_CHANCE,
   WINDUP_BONUS_MULTIPLIER,
   WINDUP_WRONG_MULTIPLIER,
   xpForEnemy,
@@ -74,7 +75,7 @@ interface GameStore {
   armWindUp: () => void
   useBag: () => void
   useDodge: () => void
-  useStagger: () => void
+  swapCharacter: (characterId: string) => void
   castSkill: (skillId: string) => void
   resolveSkill: () => void
   unlockActiveSkill: (skillId: string) => void
@@ -159,6 +160,7 @@ function runAttackPower(player: PlayerState, run: RunState): number {
  */
 function tickEffects(run: RunState, attackPower: number): string {
   if (run.attackBuffTurns > 0) run.attackBuffTurns -= 1
+  if (run.swapCooldown > 0) run.swapCooldown -= 1
   if (run.burn <= 0 || run.status !== 'active') return ''
 
   const enemy = currentEnemy(run)
@@ -263,6 +265,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       correctStreak: 0,
       burn: 0,
       attackBuffTurns: 0,
+      swapCooldown: 0,
     }
 
     set({
@@ -307,6 +310,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       correctStreak: 0,
       burn: 0,
       attackBuffTurns: 0,
+      swapCooldown: 0,
     }
 
     set({
@@ -451,7 +455,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     let tone: Tone
 
     if (success) {
-      message = 'Dodged the attack!'
+      // A clean dodge can leave the enemy off-balance - this is where the old
+      // Stagger action's stun went when Swap took its slot on the menu.
+      if (Math.random() < DODGE_STAGGER_CHANCE) {
+        newRun.enemyStunned = true
+        message = 'Dodged, and left it off-balance!'
+      } else {
+        message = 'Dodged the attack!'
+      }
       tone = 'good'
     } else {
       const dmg = rollDamage(enemy.damage)
@@ -481,23 +492,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
   },
 
-  useStagger: () => {
-    const { phase, run, currentQuestion } = get()
+  /**
+   * Swaps the body you're fighting in, mid-battle. Costs the turn and goes on
+   * cooldown, and because characters have different HP multipliers your current HP
+   * is clamped to the new body's maximum - swapping to a frailer character while
+   * hurt is a real risk, not a free heal.
+   */
+  swapCharacter: (characterId) => {
+    const { phase, run, player, currentQuestion } = get()
     if (phase !== 'question' || !run || run.status !== 'active') return
+    if (run.swapCooldown > 0 || characterId === player.characterId) return
+    if (!characters.some((c) => c.id === characterId)) return
 
     const newRun = cloneRun(run)
     if (currentQuestion) newRun.usedQuestionIds = [...newRun.usedQuestionIds, currentQuestion.id]
-    const success = Math.random() < STAGGER_CHANCE
-    if (success) newRun.enemyStunned = true
+    newRun.swapCooldown = SWAP_COOLDOWN_TURNS
+
+    const swapped: PlayerState = { ...player, characterId }
+    const newMaxHp = getMaxHp(swapped)
+    const newPlayer: PlayerState = { ...swapped, currentHp: Math.min(player.currentHp, newMaxHp) }
+    const character = getCharacter(characterId)
+
+    playSfx(SFX.menuClick)
+    persist(newPlayer)
 
     set({
       run: newRun,
+      player: newPlayer,
       feedback: {
-        message: success ? 'Staggered the enemy! Its next attack will whiff.' : 'Failed to stagger the enemy.',
-        tone: success ? 'good' : 'neutral',
+        message: `Swapped to ${character.name}!`,
+        tone: 'good',
         target: 'none',
         enemyDefeated: false,
-        anim: 'attack',
+        anim: 'defend',
       },
       phase: 'feedback',
       windUpArmed: false,

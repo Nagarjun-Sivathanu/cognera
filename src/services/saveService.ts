@@ -1,5 +1,6 @@
 import { DEFAULT_CHARACTER_ID } from '../game/characters'
 import { ALL_SLOTS, defaultIconFor } from '../game/loot'
+import { getMaxHp } from '../game/player'
 import type { Item, ItemSlot, PlayerState } from '../types'
 
 export interface SaveData {
@@ -42,18 +43,19 @@ function migrate(data: SaveData): SaveData {
     .map(migrateItem)
     .filter((i): i is Item => i !== null)
 
-  return {
-    ...data,
-    player: {
-      ...player,
-      equipped,
-      inventory,
-      unlockedSkills: player.unlockedSkills ?? {},
-      unlockedActiveSkills: player.unlockedActiveSkills ?? [],
-      subjectStats: player.subjectStats ?? {},
-      characterId: player.characterId ?? DEFAULT_CHARACTER_ID,
-    },
+  const migrated: PlayerState = {
+    ...player,
+    equipped,
+    inventory,
+    unlockedSkills: player.unlockedSkills ?? {},
+    unlockedActiveSkills: player.unlockedActiveSkills ?? [],
+    subjectStats: player.subjectStats ?? {},
+    characterId: player.characterId ?? DEFAULT_CHARACTER_ID,
   }
+
+  // Characters scale max HP, so a save made as a tankier body can carry more HP than
+  // the current one allows. Clamp rather than showing 400/383.
+  return { ...data, player: { ...migrated, currentHp: Math.min(migrated.currentHp, getMaxHp(migrated)) } }
 }
 
 // LocalStorage-backed for the hackathon MVP. Swap this implementation for one

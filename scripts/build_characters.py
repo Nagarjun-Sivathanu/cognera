@@ -92,6 +92,9 @@ RANGER_FX = {
     "ranger-poison": ("arrow_hit_poison", 256, 128),
     "ranger-entangle": ("arrow_hit_entangle", 256, 128),
     "ranger-shower": ("arrow_shower_effect", 256, 128),
+    # The in-flight arrow and its plain impact, used for the Ranger's basic shot.
+    "ranger-arrow": ("arrow", 256, 128),
+    "ranger-arrow-hit": ("arrow_hit", 256, 128),
 }
 
 

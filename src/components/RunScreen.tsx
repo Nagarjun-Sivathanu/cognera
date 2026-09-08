@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { getActiveSkill, skillImpactMs, usableSkills } from '../game/activeSkills'
 import { getBackground } from '../game/backgrounds'
-import { getCharacter, type CharacterAnim } from '../game/characters'
+import { animDurationMs, characters, getCharacter, type CharacterAnim } from '../game/characters'
 import { FOCUS_MAX } from '../game/combat'
 import { useGameStore } from '../store/gameStore'
 import { EnemyCard } from './EnemyCard'
 import { PlayerPanel } from './PlayerPanel'
+import { Projectile } from './Projectile'
 import { QuestionCard } from './QuestionCard'
 import { ResultModal } from './ResultModal'
 import { Sprite } from './Sprite'
@@ -17,6 +18,9 @@ const DEATH_DELAY_MS = 2200
 // Zigzag offsets (bottom-aligned baseline, so only upward/positive values) so
 // enemies don't sit in a flat line.
 const STAGGER_OFFSETS = [0, 26, 8, 20, 4]
+
+// Animations during which a ranged character actually looses a shot.
+const ATTACK_ANIMS: CharacterAnim[] = ['attack', 'attack2', 'attack3', 'special']
 
 const TONE_COLOR: Record<string, string> = {
   good: 'text-emerald-400',
@@ -60,7 +64,7 @@ export function RunScreen() {
   const armWindUp = useGameStore((s) => s.armWindUp)
   const useBag = useGameStore((s) => s.useBag)
   const useDodge = useGameStore((s) => s.useDodge)
-  const useStagger = useGameStore((s) => s.useStagger)
+  const swapCharacter = useGameStore((s) => s.swapCharacter)
   const castSkill = useGameStore((s) => s.castSkill)
   const resolveSkill = useGameStore((s) => s.resolveSkill)
   const pendingSkill = useGameStore((s) => s.pendingSkill)
@@ -68,6 +72,7 @@ export function RunScreen() {
   const retreat = useGameStore((s) => s.retreat)
   const acknowledgeResult = useGameStore((s) => s.acknowledgeResult)
   const [skillMenuOpen, setSkillMenuOpen] = useState(false)
+  const [swapMenuOpen, setSwapMenuOpen] = useState(false)
 
   const character = getCharacter(player.characterId)
 
@@ -154,6 +159,16 @@ export function RunScreen() {
           </div>
         </div>
 
+        {/* A ranged character's shot crossing to the enemy, so the arrow visibly
+            connects rather than stopping at the bow. */}
+        {character.projectile && phase === 'feedback' && ATTACK_ANIMS.includes(playerAnim) && (
+          <Projectile
+            key={`${feedback?.message}-${playerAnim}`}
+            character={character}
+            animMs={animDurationMs(character, playerAnim)}
+          />
+        )}
+
         {/* Overlay effects, laid out to mirror the combatants underneath them. Most of
             the Elementals skills have their effect baked into the caster's animation
             and so carry no overlay at all. */}
@@ -198,7 +213,33 @@ export function RunScreen() {
 
           <FocusBar focus={run.focus} />
 
-          {skillMenuOpen ? (
+          {swapMenuOpen ? (
+            <div className="space-y-1">
+              {characters
+                .filter((c) => c.id !== player.characterId)
+                .map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    disabled={!canAct || run.swapCooldown > 0}
+                    title={c.stats.role}
+                    onClick={() => {
+                      swapCharacter(c.id)
+                      setSwapMenuOpen(false)
+                    }}
+                    className="font-medieval flex w-full items-center justify-between rounded border-2 border-amber-800 bg-amber-950/70 px-2 py-1 text-xs text-amber-200 hover:bg-amber-900/70 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <span>{c.name}</span>
+                    <span className="text-[10px] text-stone-400">
+                      {c.stats.attack}x atk · {c.stats.hp}x hp
+                    </span>
+                  </button>
+                ))}
+              <button type="button" onClick={() => setSwapMenuOpen(false)} className={`${ACTION_BUTTON} w-full`}>
+                Back
+              </button>
+            </div>
+          ) : skillMenuOpen ? (
             <div className="space-y-1">
               {knownSkills.length === 0 && (
                 <p className="text-center text-[11px] text-stone-500">
@@ -234,8 +275,14 @@ export function RunScreen() {
               <button type="button" disabled={!canAct || player.potions <= 0} onClick={useBag} className={ACTION_BUTTON}>
                 Bag ({player.potions})
               </button>
-              <button type="button" disabled={!canAct} onClick={useStagger} className={ACTION_BUTTON}>
-                Stagger
+              <button
+                type="button"
+                disabled={!canAct || run.swapCooldown > 0}
+                onClick={() => setSwapMenuOpen(true)}
+                className={ACTION_BUTTON}
+                title="Change which character you're fighting as"
+              >
+                {run.swapCooldown > 0 ? `Swap (${run.swapCooldown})` : 'Swap'}
               </button>
               <button type="button" disabled={!canAct} onClick={useDodge} className={ACTION_BUTTON}>
                 Dodge

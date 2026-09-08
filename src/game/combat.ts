@@ -86,7 +86,11 @@ export const BURN_POWER = 0.6
 
 // Battle action tuning - adjust here if the balance feels off.
 export const DODGE_CHANCE = 0.5
-export const STAGGER_CHANCE = 0.5
+// A successful dodge can also leave the enemy off-balance. This used to be its own
+// Stagger action, folded into Dodge when Swap took Stagger's slot.
+export const DODGE_STAGGER_CHANCE = 0.35
+/** Turns before the character can be swapped again mid-battle. */
+export const SWAP_COOLDOWN_TURNS = 3
 export const WINDUP_BONUS_MULTIPLIER = 1.75
 export const WINDUP_WRONG_MULTIPLIER = 1.6
 export const BAG_HEAL_FRACTION = 0.4

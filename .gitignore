@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment files - never commit these. Vite exposes any VITE_-prefixed variable
+# to the browser bundle, so treat everything in here as public-facing config, and
+# keep genuinely secret keys (Supabase service_role, OAuth client secrets) out of
+# the project entirely - they belong in the Supabase/Vercel dashboards.
+.env
+.env.*
+!.env.example
+
 # Raw purchased asset library (zips/rars/aseprite sources) - not tracked.
 # Only the specific files actually used by the game live under public/sprites.
 /Assets
