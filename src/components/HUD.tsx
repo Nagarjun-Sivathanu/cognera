@@ -58,6 +58,7 @@ export function HUD({
         {/* The frog's desk: every past mistake and how you're trending. */}
         <button
           type="button"
+          data-tour="study-desk"
           onClick={onOpenStudyDesk}
           title="The Frog Wizard's Desk - past mistakes and progress"
           className="relative flex items-center gap-2 rounded border border-emerald-800 bg-emerald-950/40 px-3 py-1.5 text-sm text-emerald-200 hover:bg-emerald-900/50"

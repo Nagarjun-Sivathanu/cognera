@@ -142,7 +142,7 @@ export function RunScreen() {
         <div className="relative z-10 flex h-full items-end justify-between gap-4 px-6 pb-8">
           <PlayerPanel anim={playerAnim} charged={run.charged} />
 
-          <div className="flex items-end gap-4 pr-4">
+          <div data-tour="enemies" className="flex items-end gap-4 pr-4">
             {encounter.map((enemy, i) => (
               <div
                 key={enemy.instanceId}
@@ -211,7 +211,9 @@ export function RunScreen() {
             {feedback && <p className={`mt-0.5 text-xs font-bold ${TONE_COLOR[feedback.tone]}`}>{feedback.message}</p>}
           </div>
 
-          <FocusBar focus={run.focus} />
+          <div data-tour="focus-bar">
+            <FocusBar focus={run.focus} />
+          </div>
 
           {swapMenuOpen ? (
             <div className="space-y-1">
@@ -271,7 +273,7 @@ export function RunScreen() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-1.5">
+            <div data-tour="action-buttons" className="grid grid-cols-2 gap-1.5">
               <button type="button" disabled={!canAct || player.potions <= 0} onClick={useBag} className={ACTION_BUTTON}>
                 Bag ({player.potions})
               </button>
@@ -319,7 +321,7 @@ export function RunScreen() {
           </button>
         </div>
 
-        <div className="flex items-center justify-center overflow-y-auto bg-[#1c140c] p-2">
+        <div data-tour="question-panel" className="flex items-center justify-center overflow-y-auto bg-[#1c140c] p-2">
           {currentQuestion && (
             <div className="h-full w-full">
               <QuestionCard question={currentQuestion} answering={phase === 'question'} onAnswer={answerQuestion} />

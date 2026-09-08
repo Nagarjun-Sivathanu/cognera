@@ -27,7 +27,10 @@ export function PlayerPanel({ anim, charged }: Props) {
   if (character.wearsEquipment && resolved.anim === 'attack') layers = [...layers, ATTACK_FX_LAYER]
 
   return (
-    <div className={`flex w-48 flex-col items-center text-center transition ${hurt ? 'brightness-150' : ''}`}>
+    <div
+      data-tour="player-panel"
+      className={`flex w-48 flex-col items-center text-center transition ${hurt ? 'brightness-150' : ''}`}
+    >
       <Sprite
         // Remounting per animation restarts one-shots (two hits in a row must both play).
         key={resolved.anim}

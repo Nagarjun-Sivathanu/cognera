@@ -67,11 +67,15 @@ interface GameStore {
   selectedSubjectId: string | null
   selectedChapter: string | null // null = total revision (all chapters)
   vfx: { skillId: string; key: number } | null // effect currently playing over the battlefield
+  /** Index into tourSteps, or null when no walkthrough is running. */
+  tourIndex: number | null
   pendingSkill: string | null // cast in flight, waiting for its animation to connect
 
   enterHub: () => void
   enterMap: () => void
   enterSandbox: () => void
+  advanceTour: (index: number) => void
+  endTour: () => void
   selectSubject: (subjectId: string) => void
   selectChapter: (chapter: string | null) => void
   backToSubjects: () => void
@@ -195,6 +199,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedChapter: null,
   vfx: null,
   pendingSkill: null,
+  // A brand new player (no save on disk) gets walked through the game once.
+  tourIndex: initialSave ? null : 0,
 
   enterHub: () => {
     playSfx(SFX.menuClick)
@@ -210,6 +216,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     playSfx(SFX.menuClick)
     playBgm(BGM.menu)
     set({ view: 'sandbox' })
+  },
+  advanceTour: (index) => set({ tourIndex: index }),
+  endTour: () => {
+    const newPlayer = { ...get().player, tourCompleted: true }
+    set({ tourIndex: null, player: newPlayer })
+    persist(newPlayer)
   },
   selectSubject: (subjectId) => {
     playSfx(SFX.menuClick)

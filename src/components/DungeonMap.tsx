@@ -89,6 +89,7 @@ export function DungeonMap() {
         </button>
       </div>
 
+      <div data-tour="tier-nodes" className="pointer-events-none absolute inset-x-6 bottom-10 top-24" />
       {dungeons.map((d) => (
         <DungeonNode key={d.id} dungeon={d} />
       ))}

@@ -53,6 +53,7 @@ function migrate(data: SaveData): SaveData {
     topicStats: player.topicStats ?? {},
     mistakeLog: player.mistakeLog ?? [],
     solutionCache: player.solutionCache ?? {},
+    tourCompleted: player.tourCompleted ?? true, // existing saves have already played
     characterId: player.characterId ?? DEFAULT_CHARACTER_ID,
   }
 

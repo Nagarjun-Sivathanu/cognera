@@ -2,6 +2,15 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Replace the tutorial screen with a first-run guided tour
+
+- The tutorial is no longer a hub mode. It now **starts by itself for a new player** — no save on disk — the moment they enter the hub, and never shows again once seen or skipped. Existing saves are migrated as already-completed.
+- **Spotlight overlay**: everything on screen is desaturated and dimmed except the element being explained, which keeps its colour and gets a glowing amber ring. Built from four backdrop panels around the target rather than a filter on the page, so the highlight is genuinely un-greyed rather than merely brighter.
+- **The tour follows the player through the real game** rather than describing it. It highlights Dungeon Mode and waits for the actual click, then explains the subject picker, Total Revision versus single-chapter drilling, the four difficulty tiers, and then walks through a live battle — question panel, enemy, HP, Focus bar, action buttons — before pointing at the frog's desk.
+- Steps are grouped by screen and the tour re-syncs to whichever screen the player is on, so navigating ahead or being moved on by the game never strands it.
+- **The frog emotes**: seven emotions each set the text differently and change his posture — `excited` is uppercase amber medieval and he bounces, `smug` lowercase italic indigo and he tilts, `deadpan` monospace grey and he turns greyscale. A ribbit plays on each new bubble.
+- Content matches the game as it actually is: Stagger no longer exists (it became Swap, its stun moving onto Dodge), so the tour teaches Wind Up, Dodge, Bag, Swap, the skill school with Focus, and Retreat.
+
 ## Cache worked solutions per question, solved once and reused
 
 - **Solutions are now cache-first.** Miss a question, and the frog looks for a worked solution: bundled first, then the player's own cache. Anything without one joins a "wanted" list rather than being recomputed — so a given question is only ever solved once, however many times it comes up.

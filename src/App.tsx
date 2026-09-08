@@ -3,6 +3,7 @@ import { ChapterSelect } from './components/ChapterSelect'
 import { CharacterSheet } from './components/CharacterSheet'
 import { DungeonMap } from './components/DungeonMap'
 import { FontSizeControl } from './components/FontSizeControl'
+import { GuidedTour } from './components/GuidedTour'
 import { HUD } from './components/HUD'
 import { HubScreen } from './components/HubScreen'
 import { RunScreen } from './components/RunScreen'
@@ -31,6 +32,7 @@ function App() {
       <>
         <HubScreen />
         <FontSizeControl />
+        <GuidedTour />
       </>
     )
   }
@@ -46,6 +48,7 @@ function App() {
       {sheetOpen && <CharacterSheet onClose={() => setSheetOpen(false)} />}
       {studyDeskOpen && <StudyDesk onClose={() => setStudyDeskOpen(false)} />}
       <FontSizeControl />
+      <GuidedTour />
     </div>
   )
 }

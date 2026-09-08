@@ -38,6 +38,7 @@ export function ChapterSelect() {
 
         <button
           type="button"
+          data-tour="total-revision"
           onClick={() => selectChapter(null)}
           className="mt-6 w-full rounded-lg border-2 border-amber-600 bg-amber-950/70 p-4 text-left shadow-lg transition hover:brightness-125"
         >
@@ -49,7 +50,7 @@ export function ChapterSelect() {
         </button>
 
         <p className="font-medieval mt-6 text-sm uppercase tracking-wide text-stone-400">Chapter revision</p>
-        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+        <div data-tour="chapter-list" className="mt-2 grid gap-3 sm:grid-cols-2">
           {chapters.map((chapter) => (
             <button
               key={chapter}

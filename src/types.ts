@@ -181,6 +181,8 @@ export interface PlayerState {
   /** Worked solutions produced for this player, keyed by question id. Written once, reused forever. */
   solutionCache: Record<string, { keyIdea: string; steps: string[] }>
   clearedRuns: number
+  /** Set once the first-run walkthrough has been seen or skipped. */
+  tourCompleted: boolean
 }
 
 export interface LastRunResult {

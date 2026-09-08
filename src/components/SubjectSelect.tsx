@@ -16,7 +16,7 @@ export function SubjectSelect() {
         <h2 className="font-medieval text-2xl text-amber-200">Choose a Subject</h2>
         <p className="mt-1 text-sm text-stone-400">No levels here - just pick where you want to dig in.</p>
 
-        <div className="mx-auto mt-6 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+        <div data-tour="subject-list" className="mx-auto mt-6 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
           {SUBJECTS.map((s) => (
             <button
               key={s.id}

@@ -74,6 +74,7 @@ export function createNewPlayer(): PlayerState {
     mistakeLog: [],
     solutionCache: {},
     clearedRuns: 0,
+    tourCompleted: false,
   }
 }
 

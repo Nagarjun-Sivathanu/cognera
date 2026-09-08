@@ -78,6 +78,7 @@ export function HubScreen() {
         {MODES.map((mode) => (
           <button
             key={mode.key}
+            data-tour={`mode-${mode.key}`}
             type="button"
             disabled={!mode.available}
             onClick={() => {
