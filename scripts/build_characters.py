@@ -33,6 +33,8 @@ CHARACTERS = {
         "anims": {
             "idle": "01_idle",
             "attack": "05_1_atk",
+            "attack2": "06_2_atk",
+            "attack3": "07_3_atk",
             "special": "08_sp_atk",
             "defend": "09_defend",
             "hurt": "10_take_hit",
@@ -44,7 +46,10 @@ CHARACTERS = {
         "anims": {
             "idle": "idle",
             "attack": "1_atk",
+            "attack2": "2_atk",
+            "attack3": "3_atk",
             "special": "sp_atk",
+            "meditate": "meditate",
             "defend": "defend",
             "hurt": "take_hit",
             "death": "death",
@@ -55,6 +60,8 @@ CHARACTERS = {
         "anims": {
             "idle": "idle",
             "attack": "1_atk",
+            "attack2": "2_atk",
+            "attack3": "3_atk",
             "special": "sp_atk",
             "defend": "defend",
             "hurt": "take_hit",
@@ -66,12 +73,25 @@ CHARACTERS = {
         "anims": {
             "idle": "idle",
             "attack": "1_atk",
+            "attack2": "2_atk",
+            "attack3": "3_atk",
             "special": "sp_atk",
             "defend": "defend",
             "hurt": "take_hit",
             "death": "death",
         },
     },
+}
+
+# The Leaf Ranger is the only pack shipping standalone projectile/impact art; these
+# play over the enemy when its skills land. 256x128 frames, unlike the 288x128 bodies.
+RANGER_FX_DIR = os.path.join(
+    "Elementals_Leaf_ranger_Free_v1.0", "animations", "PNG", "projectiles_and_effects"
+)
+RANGER_FX = {
+    "ranger-poison": ("arrow_hit_poison", 256, 128),
+    "ranger-entangle": ("arrow_hit_entangle", 256, 128),
+    "ranger-shower": ("arrow_shower_effect", 256, 128),
 }
 
 
@@ -87,19 +107,30 @@ def frame_files(folder):
     return sorted(files, key=key)
 
 
-def build_strip(folder, out_path):
+def build_strip(folder, out_path, frame_w=FRAME_W, frame_h=FRAME_H):
     files = frame_files(folder)
     if not files:
         raise SystemExit(f"no frames in {folder}")
-    strip = Image.new("RGBA", (FRAME_W * len(files), FRAME_H), (0, 0, 0, 0))
+    strip = Image.new("RGBA", (frame_w * len(files), frame_h), (0, 0, 0, 0))
     for i, f in enumerate(files):
         im = Image.open(f).convert("RGBA")
-        if im.size != (FRAME_W, FRAME_H):
-            raise SystemExit(f"{f} is {im.size}, expected {(FRAME_W, FRAME_H)}")
-        strip.alpha_composite(im, (i * FRAME_W, 0))
+        if im.size != (frame_w, frame_h):
+            raise SystemExit(f"{f} is {im.size}, expected {(frame_w, frame_h)}")
+        strip.alpha_composite(im, (i * frame_w, 0))
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     strip.save(out_path, optimize=True)
     return len(files)
+
+
+def content_box(folder, frame_w, frame_h):
+    """Union bbox across an effect's frames, used as its render anchor."""
+    boxes = [Image.open(f).convert("RGBA").getbbox() for f in frame_files(folder)]
+    boxes = [b for b in boxes if b]
+    left = min(b[0] for b in boxes)
+    top = min(b[1] for b in boxes)
+    right = max(b[2] for b in boxes)
+    bottom = max(b[3] for b in boxes)
+    return {"x": left, "y": top, "w": right - left, "h": bottom - top}
 
 
 def idle_anchor(folder):
@@ -140,7 +171,20 @@ def main():
         manifest[char_id] = {"anchor": anchor, "frames": anims}
         print(f"{char_id:16s} anchor={anchor}\n")
 
-    print(json.dumps(manifest, indent=2))
+    fx = {}
+    for fx_id, (folder, fw, fh) in RANGER_FX.items():
+        src = os.path.join(SRC_ROOT, RANGER_FX_DIR, folder)
+        out = os.path.join("public", "sprites", "vfx", f"{fx_id}.png")
+        count = build_strip(src, out, fw, fh)
+        fx[fx_id] = {
+            "frameWidth": fw,
+            "frameHeight": fh,
+            "frameCount": count,
+            "content": content_box(src, fw, fh),
+        }
+        print(f"{fx_id:16s} {count:2d} frames -> {out}")
+
+    print(json.dumps({"characters": manifest, "vfx": fx}, indent=2))
 
 
 if __name__ == "__main__":

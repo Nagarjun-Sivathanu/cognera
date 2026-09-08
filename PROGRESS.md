@@ -46,7 +46,8 @@ Title screen (animated parallax cave)
 - Full navigation flow above, verified end to end.
 - Turn-based combat where damage scales with player attack power (gear/level/skills), so a leveled-up player can one-shot weak enemies.
 - Battle actions: Attack (default), Bag (heal), Stagger (stun chance), Dodge (evasion chance), Wind Up (risk/reward damage modifier), Flame Arts (active skills), Retreat.
-- **Focus**: a bar that fills only from correct answers — faster the longer your streak — and is spent casting Flame Arts. It's the mechanical link between answering well and combat power.
+- **Focus**: a bar that fills only from correct answers — faster the longer your streak — and is spent casting skills. It's the mechanical link between answering well and combat power.
+- **Per-character skill schools**: each of the five characters has its own 3–4 skills, animated with its own art (Emberblade, Stone Path, Wild Hunt, Windcraft, Flame Arts). Damage lands part-way through the cast animation, when the swing connects — not on the button press.
 - **Equipment**: 7 slots, 6 of them visible on the Adventurer's sprite, with rarity tinting and real item icons.
 - **Five playable characters**, swappable at any time from the character sheet's Hero tab, each animating per battle action (attack / take-hit / block / special / death).
 - Randomized loot (5 rarities, tier-weighted odds), a passive skill tree, and 4 unlockable active skills.
@@ -76,4 +77,4 @@ Roughly in likely priority order, not a commitment:
 4. PvP / Leaderboard / Guild — pick one to build out next.
 5. Balance pass on `combat.ts` (focus gain, skill costs, dodge/stagger odds) and `dungeonLayout.ts` (tier budgets, sandbox ramp) once there's been real playtesting.
 6. More enemy animations — only idle sheets are wired up; the packs also ship attack/hurt/move animations that could play on hit and on the enemy's counter-attack. The player characters already animate per action, so the enemies are the remaining half of that.
-7. The Elementals packs also include run/roll/jump animations and the Leaf Ranger's arrow projectiles, none of which the turn-based battle uses yet.
+7. The Elementals packs also include run/roll/jump animations and several of the Leaf Ranger's projectiles (plain/diagonal arrows, beam extension, thorn hits) that the turn-based battle doesn't use yet.

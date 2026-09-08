@@ -2,6 +2,19 @@
 
 All notable changes to this project, newest first. Each entry corresponds to a commit on `UI_UX-and-dungeons-base-designs` (branched off `master`).
 
+## Give every character its own skills, and land skill damage on impact
+
+- **Fixed: skills applied damage before the animation played.** The numbers moved the instant you cast, then an animation played over an already-resolved turn, so the effect looked cosmetic. Casting is now two-phase — the animation starts and the focus is spent, and the hit lands part-way through the swing, when it visually connects. Each skill declares how far through its animation that happens.
+- **Each character now has its own skill school**, animated with its own art rather than sharing one borrowed set:
+  - **Fire Knight — Emberblade**: Ember Cleave, Flame Wheel (spinning AoE), Inferno Blade.
+  - **Ground Monk — Stone Path**: Iron Palm, Stone Spikes (erupts under every enemy), Meditation (heal + attack buff, using the pack's meditate animation), Mountain's Wrath.
+  - **Leaf Ranger — Wild Hunt**: Poison Arrow, Entangling Shot (roots the enemy so its next attack whiffs), Arrow Volley, Verdant Beam.
+  - **Wind Hashashin — Windcraft**: Blade Flurry, Cyclone, Gale Dash.
+  - **Adventurer — Flame Arts**: keeps the original four, since its sheets have no spell animations of their own.
+- The Elementals packs bake their spell effects into the attack animations, so those skills need no overlay art. The Leaf Ranger is the only pack shipping standalone projectiles, so its arrows get real poison/entangle/volley impact effects over the enemy.
+- Added a **stun** skill type, and wired up the extra attack animations (2nd/3rd attack, special, meditate) that were previously unused.
+- The battle menu and the character sheet's skill list are now labelled with, and filtered to, the current character's school. Skills you've learned for a character are remembered if you switch away and back.
+
 ## Add selectable characters with full battle animations
 
 - **Five playable characters**, chosen from a new Hero tab in the character sheet: the original Adventurer plus Fire Knight, Ground Monk, Leaf Ranger and Wind Hashashin from the Elementals packs. The picker previews each one animating on hover. The choice is cosmetic — stats, gear and skills come with you — and it's saved with your progress.

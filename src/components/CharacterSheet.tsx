@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { activeSkills } from '../game/activeSkills'
+import { skillsForCharacter } from '../game/activeSkills'
 import { characters, getCharacter, resolveAnim, type CharacterAnim } from '../game/characters'
 import { SLOT_LABEL } from '../game/loot'
 import { getAttackPower, getLevel, getMaxHp, skills, xpIntoLevel } from '../game/player'
@@ -217,6 +217,8 @@ function SkillsTab() {
   const player = useGameStore((s) => s.player)
   const spendSkillPoint = useGameStore((s) => s.spendSkillPoint)
   const unlockActiveSkill = useGameStore((s) => s.unlockActiveSkill)
+  const character = getCharacter(player.characterId)
+  const characterSkills = skillsForCharacter(player.characterId)
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -253,12 +255,13 @@ function SkillsTab() {
       </Panel>
 
       <Panel className="p-3">
-        <p className="font-medieval mb-2 text-sm text-amber-300">Flame Arts</p>
+        <p className="font-medieval mb-2 text-sm text-amber-300">{character.skillSchool}</p>
         <p className="mb-2 text-[11px] text-stone-500">
-          Cast in battle using Focus, which builds up as you answer correctly.
+          {character.name}'s own skills, cast in battle using Focus, which builds up as you answer correctly.
+          Each character has its own set — switching heroes switches these.
         </p>
         <div className="space-y-2">
-          {activeSkills.map((skill) => {
+          {characterSkills.map((skill) => {
             const unlocked = player.unlockedActiveSkills.includes(skill.id)
             const canAfford = player.skillPoints >= skill.unlockCost
             return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getActiveSkill } from '../game/activeSkills'
+import { getActiveSkill, skillImpactMs, usableSkills } from '../game/activeSkills'
 import { getBackground } from '../game/backgrounds'
-import type { CharacterAnim } from '../game/characters'
+import { getCharacter, type CharacterAnim } from '../game/characters'
 import { FOCUS_MAX } from '../game/combat'
 import { useGameStore } from '../store/gameStore'
 import { EnemyCard } from './EnemyCard'
@@ -62,17 +62,31 @@ export function RunScreen() {
   const useDodge = useGameStore((s) => s.useDodge)
   const useStagger = useGameStore((s) => s.useStagger)
   const castSkill = useGameStore((s) => s.castSkill)
+  const resolveSkill = useGameStore((s) => s.resolveSkill)
+  const pendingSkill = useGameStore((s) => s.pendingSkill)
   const advance = useGameStore((s) => s.advance)
   const retreat = useGameStore((s) => s.retreat)
   const acknowledgeResult = useGameStore((s) => s.acknowledgeResult)
   const [skillMenuOpen, setSkillMenuOpen] = useState(false)
 
+  const character = getCharacter(player.characterId)
+
+  // A cast holds the turn open until its animation connects; only then does the hit
+  // land, and only after that does the turn advance.
   useEffect(() => {
     if (phase !== 'feedback') return
+
+    if (pendingSkill) {
+      const skill = getActiveSkill(pendingSkill)
+      const impact = skill ? skillImpactMs(character, skill) : 0
+      const timer = setTimeout(() => resolveSkill(), impact)
+      return () => clearTimeout(timer)
+    }
+
     const delay = feedback?.anim === 'death' ? DEATH_DELAY_MS : FEEDBACK_DELAY_MS
     const timer = setTimeout(() => advance(), delay)
     return () => clearTimeout(timer)
-  }, [phase, advance, feedback?.anim])
+  }, [phase, advance, feedback?.anim, pendingSkill, resolveSkill, character])
 
   if (!run) return null
 
@@ -91,9 +105,9 @@ export function RunScreen() {
   const playerAnim: CharacterAnim = phase === 'feedback' ? (feedback?.anim ?? 'idle') : 'idle'
   const canAct = phase === 'question'
   const vfxSkill = vfx ? getActiveSkill(vfx.skillId) : undefined
-  const knownSkills = player.unlockedActiveSkills
-    .map((id) => getActiveSkill(id))
-    .filter((s): s is NonNullable<typeof s> => s !== undefined)
+  const vfxSheet = vfxSkill?.vfx
+  const vfxHeight = vfxSkill?.vfxHeight ?? 130
+  const knownSkills = usableSkills(player.characterId, player.unlockedActiveSkills)
 
   return (
     <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
@@ -140,29 +154,31 @@ export function RunScreen() {
           </div>
         </div>
 
-        {/* Skill effects, laid out to mirror the combatants underneath them. */}
-        {vfxSkill && (
+        {/* Overlay effects, laid out to mirror the combatants underneath them. Most of
+            the Elementals skills have their effect baked into the caster's animation
+            and so carry no overlay at all. */}
+        {vfxSheet && (
           <div
             key={vfx!.key}
             className="pointer-events-none absolute inset-0 z-20 flex items-end justify-between gap-4 px-6 pb-8"
           >
             <div className="flex w-48 justify-center">
-              {vfxSkill.vfxTarget === 'player' && (
-                <Sprite sheet={vfxSkill.vfx} displayHeight={vfxSkill.vfxHeight} fps={16} playOnce />
+              {vfxSkill!.vfxTarget === 'player' && (
+                <Sprite sheet={vfxSheet} displayHeight={vfxHeight} fps={16} playOnce />
               )}
             </div>
             <div className="flex items-end gap-4 pr-4">
               {encounter.map((enemy, i) => {
                 const show =
-                  vfxSkill.vfxTarget === 'all-enemies' ||
-                  (vfxSkill.vfxTarget === 'enemy' && i === run.currentEnemyIndex)
+                  vfxSkill!.vfxTarget === 'all-enemies' ||
+                  (vfxSkill!.vfxTarget === 'enemy' && i === run.currentEnemyIndex)
                 return (
                   <div
                     key={enemy.instanceId}
                     className="flex w-56 justify-center"
                     style={{ marginBottom: STAGGER_OFFSETS[i % STAGGER_OFFSETS.length] }}
                   >
-                    {show && <Sprite sheet={vfxSkill.vfx} displayHeight={vfxSkill.vfxHeight} fps={16} playOnce />}
+                    {show && <Sprite sheet={vfxSheet} displayHeight={vfxHeight} fps={16} playOnce />}
                   </div>
                 )
               })}
@@ -186,7 +202,7 @@ export function RunScreen() {
             <div className="space-y-1">
               {knownSkills.length === 0 && (
                 <p className="text-center text-[11px] text-stone-500">
-                  No flame arts learned. Spend skill points in Character.
+                  No {character.skillSchool} learned. Spend skill points in Character.
                 </p>
               )}
               {knownSkills.map((skill) => (
@@ -242,7 +258,7 @@ export function RunScreen() {
                 onClick={() => setSkillMenuOpen(true)}
                 className="font-medieval col-span-2 rounded border-2 border-orange-700 bg-orange-950/60 px-2 py-1.5 text-xs text-orange-200 hover:bg-orange-900/60 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Flame Arts
+                {character.skillSchool}
               </button>
             </div>
           )}

@@ -57,6 +57,7 @@ interface GameStore {
   selectedSubjectId: string | null
   selectedChapter: string | null // null = total revision (all chapters)
   vfx: { skillId: string; key: number } | null // effect currently playing over the battlefield
+  pendingSkill: string | null // cast in flight, waiting for its animation to connect
 
   enterHub: () => void
   enterMap: () => void
@@ -75,6 +76,7 @@ interface GameStore {
   useDodge: () => void
   useStagger: () => void
   castSkill: (skillId: string) => void
+  resolveSkill: () => void
   unlockActiveSkill: (skillId: string) => void
   advance: () => void
   retreat: () => void
@@ -180,6 +182,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectedSubjectId: null,
   selectedChapter: null,
   vfx: null,
+  pendingSkill: null,
 
   enterHub: () => {
     playSfx(SFX.menuClick)
@@ -272,6 +275,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       phase: 'question',
       windUpArmed: false,
       vfx: null,
+      pendingSkill: null,
     })
   },
 
@@ -315,6 +319,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       phase: 'question',
       windUpArmed: false,
       vfx: null,
+      pendingSkill: null,
     })
   },
 
@@ -499,11 +504,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     })
   },
 
+  // Casting is two-phase: this starts the animation and spends the focus, and
+  // resolveSkill() lands the hit once the swing has actually connected. Applying
+  // damage up front made the numbers move before anything visibly happened.
   castSkill: (skillId) => {
     const { phase, run, player, currentQuestion } = get()
     if (phase !== 'question' || !run || run.status !== 'active') return
     const skill = getActiveSkill(skillId)
-    if (!skill || !player.unlockedActiveSkills.includes(skillId)) return
+    if (!skill || skill.characterId !== player.characterId) return
+    if (!player.unlockedActiveSkills.includes(skillId)) return
     if (run.focus < skill.cost) return
 
     const newRun = cloneRun(run)
@@ -511,6 +520,32 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Casting uses up the turn, so the question on screen is retired with it.
     if (currentQuestion) newRun.usedQuestionIds = [...newRun.usedQuestionIds, currentQuestion.id]
 
+    set({
+      run: newRun,
+      vfx: { skillId, key: Date.now() },
+      pendingSkill: skillId,
+      feedback: {
+        message: `${skill.name}!`,
+        tone: 'neutral',
+        target: 'none',
+        enemyDefeated: false,
+        anim: skill.anim,
+      },
+      phase: 'feedback',
+      windUpArmed: false,
+    })
+  },
+
+  resolveSkill: () => {
+    const { run, player, pendingSkill } = get()
+    if (!run || !pendingSkill || run.status !== 'active') return
+    const skill = getActiveSkill(pendingSkill)
+    if (!skill) {
+      set({ pendingSkill: null })
+      return
+    }
+
+    const newRun = cloneRun(run)
     let newPlayer = player
     const attackPower = runAttackPower(player, newRun)
     const enemy = currentEnemy(newRun)
@@ -520,7 +555,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (skill.kind === 'damage') {
       const dmg = Math.round(attackPower * skill.power)
       enemy.currentHp = Math.max(0, enemy.currentHp - dmg)
-      message = `${skill.name} seared ${enemy.name} for ${dmg}!`
+      message = `${skill.name} hit ${enemy.name} for ${dmg}!`
       playSfx(enemy.difficulty >= 5 ? SFX.bossGettingHit : SFX.mobGettingHit)
     } else if (skill.kind === 'aoe') {
       const dmg = Math.round(attackPower * skill.power)
@@ -531,7 +566,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       playSfx(SFX.mobGettingHit)
     } else if (skill.kind === 'burn') {
       newRun.burn = skill.turns ?? 3
-      message = `${enemy.name} is burning for ${newRun.burn} turns!`
+      message = `${enemy.name} is afflicted for ${newRun.burn} turns!`
+      playSfx(SFX.mobGettingHit)
+    } else if (skill.kind === 'stun') {
+      newRun.enemyStunned = true
+      message = `${enemy.name} is bound - its next attack will whiff.`
       playSfx(SFX.mobGettingHit)
     } else {
       const maxHp = getMaxHp(player)
@@ -549,10 +588,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({
       run: newRun,
       player: newPlayer,
-      vfx: { skillId, key: Date.now() },
-      feedback: { message, tone: 'good', target, enemyDefeated: false, anim: 'special' },
-      phase: 'feedback',
-      windUpArmed: false,
+      pendingSkill: null,
+      // Keep the same animation so the cast plays through rather than restarting.
+      feedback: { message, tone: 'good', target, enemyDefeated: false, anim: skill.anim },
     })
   },
 
@@ -584,7 +622,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const enemy = run.encounters[run.encounterIndex][run.currentEnemyIndex]
     const nextQuestion = getQuestionForEnemy(run.dungeon, enemy.difficulty, run.usedQuestionIds, run.chapter)
-    set({ currentQuestion: nextQuestion, feedback: null, phase: 'question', vfx: null })
+    set({ currentQuestion: nextQuestion, feedback: null, phase: 'question', vfx: null, pendingSkill: null })
   },
 
   retreat: () => {
@@ -600,7 +638,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     playBgm(BGM.menu)
     // Sandbox runs are launched from the hub, so they return there rather than to a tier map.
     const view = get().run?.mode === 'sandbox' ? 'hub' : 'list'
-    set({ view, run: null, currentQuestion: null, feedback: null, lastResult: null, phase: 'question', vfx: null })
+    set({
+      view,
+      run: null,
+      currentQuestion: null,
+      feedback: null,
+      lastResult: null,
+      phase: 'question',
+      vfx: null,
+      pendingSkill: null,
+    })
   },
 
   spendSkillPoint: (skillId) => {
